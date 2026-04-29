@@ -146,8 +146,11 @@ export function CanvasNode({ node }: Props) {
         style={{
           color: node.props.color,
           fontSize: node.props.fontSize,
-          textAlign: node.props.align,
+          fontFamily: node.props.fontFamily,
           fontWeight: node.props.fontWeight,
+          letterSpacing: node.props.letterSpacing,
+          lineHeight: node.props.lineHeight,
+          textAlign: node.props.align,
         }}
         className={`my-1 cursor-pointer rounded px-2 py-1 ${baseRing} ${
           isDragging ? "opacity-40" : ""

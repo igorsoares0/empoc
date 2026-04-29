@@ -20,6 +20,7 @@ import { PropertiesPanel } from "./PropertiesPanel";
 import { Preview } from "./Preview";
 import { Toolbar } from "./Toolbar";
 import { TemplatePicker } from "./TemplatePicker";
+import { EditorFonts } from "./EditorFonts";
 
 export function Editor() {
   const tree = useEditorStore((s) => s.tree);
@@ -141,6 +142,7 @@ export function Editor() {
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveDrag(null)}
     >
+      <EditorFonts />
       <div className="flex h-screen flex-col bg-white">
         <Toolbar
           view={view}
