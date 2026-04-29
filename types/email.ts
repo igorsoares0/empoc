@@ -37,6 +37,7 @@ export type ImageProps = {
   width?: string;
   height?: string;
   href?: string;
+  align?: "left" | "center" | "right";
 };
 
 export type ButtonProps = {

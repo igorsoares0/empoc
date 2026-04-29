@@ -250,6 +250,17 @@ function ImageForm({
           Limpar altura (manter proporção automática)
         </button>
       ) : null}
+      <Field label="Alinhamento">
+        <select
+          value={node.props.align ?? "center"}
+          onChange={(e) => update({ align: e.target.value })}
+          className={inputClass}
+        >
+          <option value="left">Esquerda</option>
+          <option value="center">Centro</option>
+          <option value="right">Direita</option>
+        </select>
+      </Field>
       <Field label="Link (opcional)">
         <input
           type="url"

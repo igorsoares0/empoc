@@ -208,50 +208,54 @@ export function CanvasNode({ node }: Props) {
       window.addEventListener("pointerup", onUp);
     }
 
+    const align = node.props.align ?? "center";
     return (
       <div
         ref={setDragRef}
         {...attributes}
         {...listeners}
         onClick={handleClick}
-        className={`relative my-1 cursor-pointer rounded p-1 ${baseRing} ${
+        style={{ textAlign: align }}
+        className={`my-1 cursor-pointer rounded p-1 ${baseRing} ${
           isDragging ? "opacity-40" : ""
         }`}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={imgRef}
-          src={node.props.src}
-          alt={node.props.alt ?? ""}
-          style={{
-            width: node.props.width,
-            height: node.props.height,
-            maxWidth: "100%",
-          }}
-          className="block"
-        />
-        {isSelected ? (
-          <>
-            <div
-              onPointerDown={(e) => startResize("w", e)}
-              onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-1/2 z-30 h-3 w-3 -translate-y-1/2 translate-x-1/2 cursor-ew-resize rounded-sm border border-white bg-blue-500 shadow"
-              title="Redimensionar largura"
-            />
-            <div
-              onPointerDown={(e) => startResize("h", e)}
-              onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 left-1/2 z-30 h-3 w-3 -translate-x-1/2 translate-y-1/2 cursor-ns-resize rounded-sm border border-white bg-blue-500 shadow"
-              title="Redimensionar altura"
-            />
-            <div
-              onPointerDown={(e) => startResize("corner", e)}
-              onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-0 right-0 z-30 h-3 w-3 translate-x-1/2 translate-y-1/2 cursor-nwse-resize rounded-sm border border-white bg-blue-500 shadow"
-              title="Redimensionar proporcional"
-            />
-          </>
-        ) : null}
+        <span className="relative inline-block align-top">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            ref={imgRef}
+            src={node.props.src}
+            alt={node.props.alt ?? ""}
+            style={{
+              width: node.props.width,
+              height: node.props.height,
+              maxWidth: "100%",
+            }}
+            className="block"
+          />
+          {isSelected ? (
+            <>
+              <div
+                onPointerDown={(e) => startResize("w", e)}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-1/2 z-30 h-3 w-3 -translate-y-1/2 translate-x-1/2 cursor-ew-resize rounded-sm border border-white bg-blue-500 shadow"
+                title="Redimensionar largura"
+              />
+              <div
+                onPointerDown={(e) => startResize("h", e)}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute bottom-0 left-1/2 z-30 h-3 w-3 -translate-x-1/2 translate-y-1/2 cursor-ns-resize rounded-sm border border-white bg-blue-500 shadow"
+                title="Redimensionar altura"
+              />
+              <div
+                onPointerDown={(e) => startResize("corner", e)}
+                onClick={(e) => e.stopPropagation()}
+                className="absolute bottom-0 right-0 z-30 h-3 w-3 translate-x-1/2 translate-y-1/2 cursor-nwse-resize rounded-sm border border-white bg-blue-500 shadow"
+                title="Redimensionar proporcional"
+              />
+            </>
+          ) : null}
+        </span>
       </div>
     );
   }
