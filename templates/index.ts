@@ -4,6 +4,7 @@ import { newsletter } from "./newsletter";
 import { promotional } from "./promotional";
 import { thankYou } from "./thank-you";
 import { workshops } from "./workshops";
+import { qna } from "./qna";
 
 export const templates: Template[] = [
   welcome,
@@ -11,6 +12,7 @@ export const templates: Template[] = [
   promotional,
   thankYou,
   workshops,
+  qna,
 ];
 
 export function getTemplate(id: string): Template | undefined {
