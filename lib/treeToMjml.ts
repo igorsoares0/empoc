@@ -62,6 +62,7 @@ function nodeToMjml(node: EmailNode): string {
         attr("src", node.props.src) +
         attr("alt", node.props.alt) +
         attr("width", node.props.width) +
+        attr("height", node.props.height) +
         attr("href", node.props.href) +
         ` />`
       );

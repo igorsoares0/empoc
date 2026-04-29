@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { EmailNode } from "@/types/email";
 import { useEditorStore } from "@/store/editorStore";
@@ -43,7 +44,9 @@ function DropZone({
 export function CanvasNode({ node }: Props) {
   const selectedId = useEditorStore((s) => s.selectedId);
   const selectNode = useEditorStore((s) => s.selectNode);
+  const updateNode = useEditorStore((s) => s.updateNode);
   const isSelected = selectedId === node.id;
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   const { setNodeRef: setDragRef, attributes, listeners, isDragging } =
     useDraggable({
@@ -168,23 +171,87 @@ export function CanvasNode({ node }: Props) {
   }
 
   if (node.type === "image") {
+    function startResize(
+      mode: "w" | "h" | "corner",
+      e: React.PointerEvent<HTMLDivElement>,
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      const el = imgRef.current;
+      if (!el) return;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startW = el.offsetWidth;
+      const startH = el.offsetHeight;
+      const ratio = startW > 0 ? startH / startW : 1;
+
+      function onMove(ev: PointerEvent) {
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        if (mode === "w") {
+          const w = Math.max(20, Math.round(startW + dx));
+          updateNode(node.id, { width: `${w}px` });
+        } else if (mode === "h") {
+          const h = Math.max(20, Math.round(startH + dy));
+          updateNode(node.id, { height: `${h}px` });
+        } else {
+          const w = Math.max(20, Math.round(startW + dx));
+          const h = Math.max(20, Math.round(w * ratio));
+          updateNode(node.id, { width: `${w}px`, height: `${h}px` });
+        }
+      }
+      function onUp() {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+      }
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+    }
+
     return (
       <div
         ref={setDragRef}
         {...attributes}
         {...listeners}
         onClick={handleClick}
-        className={`my-1 cursor-pointer rounded p-1 ${baseRing} ${
+        className={`relative my-1 cursor-pointer rounded p-1 ${baseRing} ${
           isDragging ? "opacity-40" : ""
         }`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          ref={imgRef}
           src={node.props.src}
           alt={node.props.alt ?? ""}
-          style={{ width: node.props.width, maxWidth: "100%" }}
+          style={{
+            width: node.props.width,
+            height: node.props.height,
+            maxWidth: "100%",
+          }}
           className="block"
         />
+        {isSelected ? (
+          <>
+            <div
+              onPointerDown={(e) => startResize("w", e)}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute right-0 top-1/2 z-30 h-3 w-3 -translate-y-1/2 translate-x-1/2 cursor-ew-resize rounded-sm border border-white bg-blue-500 shadow"
+              title="Redimensionar largura"
+            />
+            <div
+              onPointerDown={(e) => startResize("h", e)}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 left-1/2 z-30 h-3 w-3 -translate-x-1/2 translate-y-1/2 cursor-ns-resize rounded-sm border border-white bg-blue-500 shadow"
+              title="Redimensionar altura"
+            />
+            <div
+              onPointerDown={(e) => startResize("corner", e)}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-0 right-0 z-30 h-3 w-3 translate-x-1/2 translate-y-1/2 cursor-nwse-resize rounded-sm border border-white bg-blue-500 shadow"
+              title="Redimensionar proporcional"
+            />
+          </>
+        ) : null}
       </div>
     );
   }

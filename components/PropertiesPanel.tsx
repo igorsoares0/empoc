@@ -1,10 +1,12 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { useEditorStore } from "@/store/editorStore";
 import { findNode } from "@/lib/treeOps";
 import { BLOCK_LABELS } from "@/lib/defaults";
 import { FONTS } from "@/lib/fonts";
+import { processImageFile, parsePx } from "@/lib/imageUpload";
 import type { EmailNode, NavbarLink } from "@/types/email";
 
 function Field({
@@ -78,6 +80,185 @@ function FontSelect({
         </option>
       ))}
     </select>
+  );
+}
+
+function ImageForm({
+  node,
+}: {
+  node: Extract<EmailNode, { type: "image" }>;
+}) {
+  const updateNode = useEditorStore((s) => s.updateNode);
+  const update = (patch: Record<string, unknown>) => updateNode(node.id, patch);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lockAspect, setLockAspect] = useState(true);
+
+  const widthPx = parsePx(node.props.width);
+  const heightPx = parsePx(node.props.height);
+  const aspect =
+    widthPx && heightPx && heightPx > 0 ? widthPx / heightPx : null;
+
+  function setWidth(w: number) {
+    const clamped = Math.max(20, Math.round(w));
+    if (lockAspect && aspect) {
+      const h = Math.max(1, Math.round(clamped / aspect));
+      update({ width: `${clamped}px`, height: `${h}px` });
+    } else {
+      update({ width: `${clamped}px` });
+    }
+  }
+
+  function setHeight(h: number) {
+    const clamped = Math.max(20, Math.round(h));
+    if (lockAspect && aspect) {
+      const w = Math.max(1, Math.round(clamped * aspect));
+      update({ width: `${w}px`, height: `${clamped}px` });
+    } else {
+      update({ height: `${clamped}px` });
+    }
+  }
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const result = await processImageFile(file);
+      update({
+        src: result.dataUrl,
+        width: `${result.width}px`,
+        height: `${result.height}px`,
+      });
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Falha no upload");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Field label="Upload do computador">
+        <div className="flex flex-col gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:border-blue-400 hover:bg-blue-50 disabled:opacity-50"
+          >
+            {uploading ? "Processando…" : "Escolher imagem"}
+          </button>
+          {uploadError ? (
+            <span className="text-[11px] text-red-600">{uploadError}</span>
+          ) : (
+            <span className="text-[11px] text-zinc-400">
+              Imagens grandes são reduzidas para 1200px de largura.
+            </span>
+          )}
+        </div>
+      </Field>
+      <Field label="URL da imagem">
+        <input
+          type="url"
+          value={node.props.src}
+          onChange={(e) => update({ src: e.target.value })}
+          className={inputClass}
+        />
+      </Field>
+      <Field label="Texto alternativo">
+        <input
+          type="text"
+          value={node.props.alt ?? ""}
+          onChange={(e) => update({ alt: e.target.value })}
+          className={inputClass}
+        />
+      </Field>
+      <label className="flex items-center gap-2 text-xs text-zinc-700">
+        <input
+          type="checkbox"
+          checked={lockAspect}
+          onChange={(e) => setLockAspect(e.target.checked)}
+          className="h-3.5 w-3.5"
+        />
+        Manter proporção
+      </label>
+      <Field label={`Largura${widthPx ? ` · ${widthPx}px` : ""}`}>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min={20}
+            max={800}
+            step={1}
+            value={widthPx ?? 600}
+            onChange={(e) => setWidth(parseInt(e.target.value, 10))}
+            className="flex-1"
+          />
+          <input
+            type="number"
+            value={widthPx ?? ""}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!Number.isNaN(v)) setWidth(v);
+              else update({ width: undefined });
+            }}
+            placeholder="auto"
+            className={`${inputClass} w-20`}
+          />
+        </div>
+      </Field>
+      <Field label={`Altura${heightPx ? ` · ${heightPx}px` : " · auto"}`}>
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min={20}
+            max={800}
+            step={1}
+            value={heightPx ?? Math.round((widthPx ?? 600) / 2)}
+            onChange={(e) => setHeight(parseInt(e.target.value, 10))}
+            className="flex-1"
+          />
+          <input
+            type="number"
+            value={heightPx ?? ""}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!Number.isNaN(v)) setHeight(v);
+              else update({ height: undefined });
+            }}
+            placeholder="auto"
+            className={`${inputClass} w-20`}
+          />
+        </div>
+      </Field>
+      {heightPx ? (
+        <button
+          type="button"
+          onClick={() => update({ height: undefined })}
+          className="self-start text-[11px] text-blue-600 hover:underline"
+        >
+          Limpar altura (manter proporção automática)
+        </button>
+      ) : null}
+      <Field label="Link (opcional)">
+        <input
+          type="url"
+          value={node.props.href ?? ""}
+          onChange={(e) => update({ href: e.target.value })}
+          className={inputClass}
+        />
+      </Field>
+    </div>
   );
 }
 
@@ -166,43 +347,7 @@ function NodeForm({ node }: { node: EmailNode }) {
   }
 
   if (node.type === "image") {
-    return (
-      <div className="flex flex-col gap-3">
-        <Field label="URL da imagem">
-          <input
-            type="url"
-            value={node.props.src}
-            onChange={(e) => update({ src: e.target.value })}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Texto alternativo">
-          <input
-            type="text"
-            value={node.props.alt ?? ""}
-            onChange={(e) => update({ alt: e.target.value })}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Largura">
-          <input
-            type="text"
-            value={node.props.width ?? ""}
-            onChange={(e) => update({ width: e.target.value })}
-            placeholder="600px"
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Link (opcional)">
-          <input
-            type="url"
-            value={node.props.href ?? ""}
-            onChange={(e) => update({ href: e.target.value })}
-            className={inputClass}
-          />
-        </Field>
-      </div>
-    );
+    return <ImageForm node={node} />;
   }
 
   if (node.type === "button") {
