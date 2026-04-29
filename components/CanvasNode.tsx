@@ -11,26 +11,30 @@ type Props = {
 function DropZone({
   parentId,
   index,
-  label,
 }: {
   parentId: string | null;
   index: number;
-  label?: string;
 }) {
   const { setNodeRef, isOver, active } = useDroppable({
     id: `drop:${parentId ?? "root"}:${index}`,
     data: { kind: "between", parentId, index },
   });
-  const isActive = !!active && isOver;
+  const isDragging = !!active;
+  const isActive = isDragging && isOver;
   return (
-    <div
-      ref={setNodeRef}
-      className={`my-0.5 h-1 rounded transition-all ${
-        isActive ? "h-2 bg-blue-500" : "bg-transparent"
-      }`}
-    >
-      {label && isActive ? (
-        <span className="sr-only">{label}</span>
+    <div className="relative h-0">
+      {/* hit area: só ativa durante drag */}
+      {isDragging ? (
+        <div
+          ref={setNodeRef}
+          className="absolute inset-x-0 -top-2 z-10 h-4"
+        />
+      ) : (
+        <div ref={setNodeRef} className="absolute inset-x-0 top-0 h-0" />
+      )}
+      {/* indicador visual só quando hovering */}
+      {isActive ? (
+        <div className="pointer-events-none absolute inset-x-0 -top-px z-20 h-0.5 rounded bg-blue-500" />
       ) : null}
     </div>
   );
