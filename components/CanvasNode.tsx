@@ -87,7 +87,7 @@ export function CanvasNode({ node }: Props) {
           backgroundColor: node.props.backgroundColor,
           padding: node.props.padding,
         }}
-        className={`relative cursor-pointer rounded ${baseRing} ${
+        className={`relative cursor-pointer ${baseRing} ${
           isDragging ? "opacity-40" : ""
         } ${containerActive ? "outline outline-2 outline-blue-500" : ""}`}
       >
