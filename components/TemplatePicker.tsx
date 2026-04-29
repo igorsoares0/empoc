@@ -86,6 +86,8 @@ function gradientForTemplate(id: string): string {
       return "linear-gradient(135deg,#dc2626,#f97316)";
     case "thank-you":
       return "linear-gradient(135deg,#f4f1ec,#c9a979)";
+    case "workshops":
+      return "linear-gradient(135deg,#494D3E,#EDE8E2)";
     default:
       return "linear-gradient(135deg,#71717a,#27272a)";
   }
@@ -101,6 +103,8 @@ function iconForTemplate(id: string): string {
       return "🎯";
     case "thank-you":
       return "🛍️";
+    case "workshops":
+      return "🌿";
     default:
       return "✉️";
   }
