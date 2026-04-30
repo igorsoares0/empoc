@@ -26,6 +26,8 @@ export function Editor() {
   const tree = useEditorStore((s) => s.tree);
   const addNode = useEditorStore((s) => s.addNode);
   const moveNode = useEditorStore((s) => s.moveNode);
+  const duplicateNode = useEditorStore((s) => s.duplicateNode);
+  const selectedId = useEditorStore((s) => s.selectedId);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
   const past = useEditorStore((s) => s.past);
@@ -50,6 +52,11 @@ export function Editor() {
     function onKey(e: KeyboardEvent) {
       const cmd = e.ctrlKey || e.metaKey;
       if (!cmd) return;
+      const target = e.target as HTMLElement | null;
+      const isEditing =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
       if (e.key === "z" && !e.shiftKey) {
         if (past.length > 0) {
           e.preventDefault();
@@ -60,11 +67,16 @@ export function Editor() {
           e.preventDefault();
           redo();
         }
+      } else if (e.key === "d" && !isEditing) {
+        if (selectedId) {
+          e.preventDefault();
+          duplicateNode(selectedId);
+        }
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo, past.length, future.length]);
+  }, [undo, redo, duplicateNode, past.length, future.length, selectedId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),

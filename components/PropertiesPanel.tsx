@@ -719,6 +719,7 @@ export function PropertiesPanel() {
   const tree = useEditorStore((s) => s.tree);
   const selectedId = useEditorStore((s) => s.selectedId);
   const deleteNode = useEditorStore((s) => s.deleteNode);
+  const duplicateNode = useEditorStore((s) => s.duplicateNode);
 
   const found = selectedId ? findNode(tree, selectedId) : null;
 
@@ -746,7 +747,15 @@ export function PropertiesPanel() {
         )}
       </div>
       {found ? (
-        <div className="border-t border-zinc-200 p-3">
+        <div className="flex flex-col gap-2 border-t border-zinc-200 p-3">
+          <button
+            type="button"
+            onClick={() => duplicateNode(found.node.id)}
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:border-blue-400 hover:bg-blue-50"
+          >
+            Duplicar bloco
+            <span className="ml-2 text-[11px] text-zinc-400">⌘D</span>
+          </button>
           <button
             type="button"
             onClick={() => deleteNode(found.node.id)}

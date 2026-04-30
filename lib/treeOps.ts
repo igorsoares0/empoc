@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import type {
   ContainerNode,
   EmailNode,
@@ -29,6 +30,45 @@ export function findNode(
     }
   }
   return null;
+}
+
+export function cloneNodeWithNewIds(n: EmailNode): EmailNode {
+  const id = nanoid(10);
+  switch (n.type) {
+    case "section":
+      return {
+        id,
+        type: "section",
+        props: { ...n.props },
+        children: n.children.map(cloneNodeWithNewIds),
+      };
+    case "column":
+      return {
+        id,
+        type: "column",
+        props: { ...n.props },
+        children: n.children.map(cloneNodeWithNewIds),
+      };
+    case "text":
+      return { id, type: "text", props: { ...n.props } };
+    case "image":
+      return { id, type: "image", props: { ...n.props } };
+    case "button":
+      return { id, type: "button", props: { ...n.props } };
+    case "spacer":
+      return { id, type: "spacer", props: { ...n.props } };
+    case "divider":
+      return { id, type: "divider", props: { ...n.props } };
+    case "navbar":
+      return {
+        id,
+        type: "navbar",
+        props: {
+          ...n.props,
+          links: n.props.links.map((l) => ({ ...l, id: nanoid(8) })),
+        },
+      };
+  }
 }
 
 export function cloneTree(tree: EmailNode[]): EmailNode[] {

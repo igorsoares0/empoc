@@ -2,7 +2,9 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { EmailNode, NodeId } from "@/types/email";
 import {
+  cloneNodeWithNewIds,
   cloneTree,
+  findNode,
   insertNode,
   removeNode,
   updateNodeProps,
@@ -22,6 +24,7 @@ type EditorState = {
     index?: number,
   ) => void;
   updateNode: (id: NodeId, patch: Record<string, unknown>) => void;
+  duplicateNode: (id: NodeId) => void;
   deleteNode: (id: NodeId) => void;
   moveNode: (
     id: NodeId,
@@ -72,6 +75,20 @@ export const useEditorStore = create<EditorState>()(
           future: [],
           tree: updateNodeProps(state.tree, id, patch),
         })),
+
+      duplicateNode: (id) =>
+        set((state) => {
+          const found = findNode(state.tree, id);
+          if (!found) return state;
+          const cloned = cloneNodeWithNewIds(found.node);
+          const parentId = found.parent ? found.parent.id : null;
+          return {
+            past: pushHistory(state),
+            future: [],
+            tree: insertNode(state.tree, parentId, cloned, found.index + 1),
+            selectedId: cloned.id,
+          };
+        }),
 
       deleteNode: (id) =>
         set((state) => ({
