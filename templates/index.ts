@@ -8,6 +8,7 @@ import { qna } from "./qna";
 import { backInStock } from "./back-in-stock";
 import { giveaway } from "./giveaway";
 import { welcomeEditorial } from "./welcome-editorial";
+import { skincare } from "./skincare";
 
 export const templates: Template[] = [
   welcome,
@@ -19,6 +20,7 @@ export const templates: Template[] = [
   backInStock,
   giveaway,
   welcomeEditorial,
+  skincare,
 ];
 
 export function getTemplate(id: string): Template | undefined {

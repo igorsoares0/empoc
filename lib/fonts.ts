@@ -59,6 +59,12 @@ export const FONTS: FontDef[] = [
     googleHref:
       "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap",
   },
+  {
+    name: "Pinyon Script",
+    family: "'Pinyon Script', cursive",
+    googleHref:
+      "https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap",
+  },
 ];
 
 export function findFontByFamily(family: string): FontDef | undefined {

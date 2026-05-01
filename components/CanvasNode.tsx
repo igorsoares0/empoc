@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { EmailNode } from "@/types/email";
 import { useEditorStore } from "@/store/editorStore";
+import { inlineMarkdownToHtml } from "@/lib/inlineMarkdown";
 
 function InlineTextEditor({
   initialValue,
@@ -300,13 +301,13 @@ export function CanvasNode({ node }: Props) {
           isDragging ? "opacity-40" : ""
         }`}
         title="Duplo clique para editar"
-      >
-        {node.props.content.split("\n").map((line, i) => (
-          <div key={i}>{line || " "}</div>
-        ))}
-      </div>
+        dangerouslySetInnerHTML={{
+          __html: inlineMarkdownToHtml(node.props.content) || "&nbsp;",
+        }}
+      />
     );
   }
+
 
   if (node.type === "image") {
     function startResize(
