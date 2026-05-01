@@ -6,6 +6,7 @@ import { thankYou } from "./thank-you";
 import { workshops } from "./workshops";
 import { qna } from "./qna";
 import { backInStock } from "./back-in-stock";
+import { giveaway } from "./giveaway";
 
 export const templates: Template[] = [
   welcome,
@@ -15,6 +16,7 @@ export const templates: Template[] = [
   workshops,
   qna,
   backInStock,
+  giveaway,
 ];
 
 export function getTemplate(id: string): Template | undefined {
