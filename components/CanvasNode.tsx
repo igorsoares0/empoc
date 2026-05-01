@@ -1,9 +1,65 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { EmailNode } from "@/types/email";
 import { useEditorStore } from "@/store/editorStore";
+
+function InlineTextEditor({
+  initialValue,
+  align,
+  onChange,
+  onCommit,
+}: {
+  initialValue: string;
+  align: "left" | "center" | "right" | undefined;
+  onChange: (v: string) => void;
+  onCommit: () => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.focus();
+    el.setSelectionRange(el.value.length, el.value.length);
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
+  return (
+    <textarea
+      ref={ref}
+      defaultValue={initialValue}
+      onChange={(e) => {
+        onChange(e.target.value);
+        const el = e.currentTarget;
+        el.style.height = "auto";
+        el.style.height = `${el.scrollHeight}px`;
+      }}
+      onBlur={onCommit}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+        e.stopPropagation();
+      }}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      style={{
+        textAlign: align,
+        font: "inherit",
+        color: "inherit",
+        letterSpacing: "inherit",
+        lineHeight: "inherit",
+        fontWeight: "inherit",
+      }}
+      className="block w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none"
+      rows={1}
+    />
+  );
+}
 
 type Props = {
   node: EmailNode;
@@ -43,9 +99,12 @@ function DropZone({
 
 export function CanvasNode({ node }: Props) {
   const selectedId = useEditorStore((s) => s.selectedId);
+  const editingId = useEditorStore((s) => s.editingId);
   const selectNode = useEditorStore((s) => s.selectNode);
+  const setEditingId = useEditorStore((s) => s.setEditingId);
   const updateNode = useEditorStore((s) => s.updateNode);
   const isSelected = selectedId === node.id;
+  const isEditing = editingId === node.id;
   const imgRef = useRef<HTMLImageElement | null>(null);
 
   const { setNodeRef: setDragRef, attributes, listeners, isDragging } =
@@ -198,24 +257,49 @@ export function CanvasNode({ node }: Props) {
   }
 
   if (node.type === "text") {
+    const sharedStyle = {
+      color: node.props.color,
+      fontSize: node.props.fontSize,
+      fontFamily: node.props.fontFamily,
+      fontWeight: node.props.fontWeight,
+      letterSpacing: node.props.letterSpacing,
+      lineHeight: node.props.lineHeight,
+      textAlign: node.props.align,
+    } as const;
+
+    if (isEditing) {
+      return (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={sharedStyle}
+          className="my-1 rounded px-2 py-1 ring-2 ring-blue-500"
+        >
+          <InlineTextEditor
+            initialValue={node.props.content}
+            align={node.props.align}
+            onChange={(v) => updateNode(node.id, { content: v })}
+            onCommit={() => setEditingId(null)}
+          />
+        </div>
+      );
+    }
+
     return (
       <div
         ref={setDragRef}
         {...attributes}
         {...listeners}
         onClick={handleClick}
-        style={{
-          color: node.props.color,
-          fontSize: node.props.fontSize,
-          fontFamily: node.props.fontFamily,
-          fontWeight: node.props.fontWeight,
-          letterSpacing: node.props.letterSpacing,
-          lineHeight: node.props.lineHeight,
-          textAlign: node.props.align,
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          selectNode(node.id);
+          setEditingId(node.id);
         }}
+        style={sharedStyle}
         className={`my-1 cursor-pointer rounded px-2 py-1 ${baseRing} ${
           isDragging ? "opacity-40" : ""
         }`}
+        title="Duplo clique para editar"
       >
         {node.props.content.split("\n").map((line, i) => (
           <div key={i}>{line || " "}</div>

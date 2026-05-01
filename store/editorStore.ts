@@ -15,6 +15,7 @@ const HISTORY_CAP = 50;
 type EditorState = {
   tree: EmailNode[];
   selectedId: NodeId | null;
+  editingId: NodeId | null;
   past: EmailNode[][];
   future: EmailNode[][];
   setTree: (tree: EmailNode[]) => void;
@@ -32,6 +33,7 @@ type EditorState = {
     toIndex: number,
   ) => void;
   selectNode: (id: NodeId | null) => void;
+  setEditingId: (id: NodeId | null) => void;
   undo: () => void;
   redo: () => void;
   canUndo: () => boolean;
@@ -50,6 +52,7 @@ export const useEditorStore = create<EditorState>()(
     (set, get) => ({
       tree: [],
       selectedId: null,
+      editingId: null,
       past: [],
       future: [],
 
@@ -96,6 +99,7 @@ export const useEditorStore = create<EditorState>()(
           future: [],
           tree: removeNode(state.tree, id),
           selectedId: state.selectedId === id ? null : state.selectedId,
+          editingId: state.editingId === id ? null : state.editingId,
         })),
 
       moveNode: (id, toParentId, toIndex) =>
@@ -129,7 +133,13 @@ export const useEditorStore = create<EditorState>()(
           };
         }),
 
-      selectNode: (id) => set({ selectedId: id }),
+      selectNode: (id) =>
+        set((state) => ({
+          selectedId: id,
+          editingId: state.editingId === id ? state.editingId : null,
+        })),
+
+      setEditingId: (id) => set({ editingId: id }),
 
       undo: () =>
         set((state) => {
@@ -163,7 +173,14 @@ export const useEditorStore = create<EditorState>()(
       canUndo: () => get().past.length > 0,
       canRedo: () => get().future.length > 0,
 
-      reset: () => set({ tree: [], selectedId: null, past: [], future: [] }),
+      reset: () =>
+        set({
+          tree: [],
+          selectedId: null,
+          editingId: null,
+          past: [],
+          future: [],
+        }),
     }),
     {
       name: "empoc-editor",
