@@ -42,6 +42,20 @@ function nodeToMjml(node: EmailNode): string {
       const inner = node.children.map(nodeToMjml).join("");
       return `${open}${inner}</mj-column>`;
     }
+    case "hero": {
+      const open =
+        `<mj-hero` +
+        attr("mode", node.props.mode) +
+        attr("height", node.props.height) +
+        attr("background-url", node.props.backgroundUrl) +
+        attr("background-color", node.props.backgroundColor) +
+        attr("background-position", node.props.backgroundPosition) +
+        attr("vertical-align", node.props.verticalAlign) +
+        attr("padding", node.props.padding) +
+        `>`;
+      const inner = node.children.map(nodeToMjml).join("");
+      return `${open}${inner}</mj-hero>`;
+    }
     case "text": {
       const open =
         `<mj-text` +
@@ -128,7 +142,11 @@ function collectFontFamilies(tree: EmailNode[]): Set<string> {
   function visit(node: EmailNode) {
     const props = node.props as { fontFamily?: string };
     if (props.fontFamily) used.add(props.fontFamily);
-    if (node.type === "section" || node.type === "column") {
+    if (
+      node.type === "section" ||
+      node.type === "column" ||
+      node.type === "hero"
+    ) {
       node.children.forEach(visit);
     }
   }

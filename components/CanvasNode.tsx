@@ -112,6 +112,60 @@ export function CanvasNode({ node }: Props) {
     );
   }
 
+  if (node.type === "hero") {
+    const justify =
+      node.props.verticalAlign === "top"
+        ? "flex-start"
+        : node.props.verticalAlign === "bottom"
+          ? "flex-end"
+          : "center";
+    const minHeight =
+      node.props.mode === "fixed-height" ? node.props.height : "240px";
+    return (
+      <div
+        ref={ref}
+        {...attributes}
+        {...listeners}
+        onClick={handleClick}
+        style={{
+          backgroundImage: node.props.backgroundUrl
+            ? `url(${node.props.backgroundUrl})`
+            : undefined,
+          backgroundColor: node.props.backgroundColor,
+          backgroundSize: "cover",
+          backgroundPosition: node.props.backgroundPosition ?? "center center",
+          padding: node.props.padding,
+          minHeight,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: justify,
+        }}
+        className={`relative cursor-pointer ${baseRing} ${
+          isDragging ? "opacity-40" : ""
+        } ${containerActive ? "outline outline-2 outline-blue-500" : ""}`}
+      >
+        <div className="absolute -top-3 left-2 z-10 rounded bg-purple-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+          Hero
+        </div>
+        {node.children.length === 0 ? (
+          <div className="rounded border-2 border-dashed border-white/60 bg-black/20 px-4 py-6 text-center text-xs text-white/80">
+            Solte texto, imagem ou botão sobre a imagem
+          </div>
+        ) : (
+          <div>
+            <DropZone parentId={node.id} index={0} />
+            {node.children.map((child, i) => (
+              <div key={child.id}>
+                <CanvasNode node={child} />
+                <DropZone parentId={node.id} index={i + 1} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (node.type === "column") {
     return (
       <div

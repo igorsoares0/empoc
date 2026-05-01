@@ -3,6 +3,7 @@ export type NodeId = string;
 export type NodeType =
   | "section"
   | "column"
+  | "hero"
   | "text"
   | "image"
   | "button"
@@ -84,10 +85,27 @@ export type NavbarProps = {
   padding?: string;
 };
 
+export type HeroProps = {
+  mode?: "fluid-height" | "fixed-height";
+  height?: string;
+  backgroundUrl?: string;
+  backgroundColor?: string;
+  backgroundPosition?: string;
+  verticalAlign?: "top" | "middle" | "bottom";
+  padding?: string;
+};
+
 export type SectionNode = {
   id: NodeId;
   type: "section";
   props: SectionProps;
+  children: EmailNode[];
+};
+
+export type HeroNode = {
+  id: NodeId;
+  type: "hero";
+  props: HeroProps;
   children: EmailNode[];
 };
 
@@ -137,6 +155,7 @@ export type NavbarNode = {
 export type EmailNode =
   | SectionNode
   | ColumnNode
+  | HeroNode
   | TextNode
   | ImageNode
   | ButtonNode
@@ -144,7 +163,7 @@ export type EmailNode =
   | DividerNode
   | NavbarNode;
 
-export type ContainerNode = SectionNode | ColumnNode;
+export type ContainerNode = SectionNode | ColumnNode | HeroNode;
 export type LeafNode =
   | TextNode
   | ImageNode

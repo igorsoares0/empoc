@@ -7,6 +7,7 @@ import { BLOCK_LABELS, BLOCK_ICONS } from "@/lib/defaults";
 const BLOCKS: NodeType[] = [
   "section",
   "column",
+  "hero",
   "text",
   "image",
   "button",

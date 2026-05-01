@@ -7,7 +7,9 @@ import type {
 } from "@/types/email";
 
 export function isContainer(node: EmailNode): node is ContainerNode {
-  return node.type === "section" || node.type === "column";
+  return (
+    node.type === "section" || node.type === "column" || node.type === "hero"
+  );
 }
 
 type FoundNode = {
@@ -49,6 +51,13 @@ export function cloneNodeWithNewIds(n: EmailNode): EmailNode {
         props: { ...n.props },
         children: n.children.map(cloneNodeWithNewIds),
       };
+    case "hero":
+      return {
+        id,
+        type: "hero",
+        props: { ...n.props },
+        children: n.children.map(cloneNodeWithNewIds),
+      };
     case "text":
       return { id, type: "text", props: { ...n.props } };
     case "image":
@@ -77,6 +86,8 @@ export function cloneTree(tree: EmailNode[]): EmailNode[] {
       case "section":
         return { ...n, props: { ...n.props }, children: cloneTree(n.children) };
       case "column":
+        return { ...n, props: { ...n.props }, children: cloneTree(n.children) };
+      case "hero":
         return { ...n, props: { ...n.props }, children: cloneTree(n.children) };
       case "text":
         return { ...n, props: { ...n.props } };
@@ -159,12 +170,15 @@ const COLUMN_LEAVES: NodeType[] = [
   "navbar",
 ];
 
+const HERO_LEAVES: NodeType[] = ["text", "image", "button", "spacer", "divider"];
+
 export function canContain(parentType: NodeType, childType: NodeType): boolean {
   if (parentType === "section") return childType === "column";
   if (parentType === "column") return COLUMN_LEAVES.includes(childType);
+  if (parentType === "hero") return HERO_LEAVES.includes(childType);
   return false;
 }
 
 export function canBeRoot(childType: NodeType): boolean {
-  return childType === "section";
+  return childType === "section" || childType === "hero";
 }

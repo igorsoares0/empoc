@@ -106,7 +106,11 @@ export const useEditorStore = create<EditorState>()(
           ): EmailNode | null => {
             for (const n of tree) {
               if (n.id === id) return n;
-              if (n.type === "section" || n.type === "column") {
+              if (
+                n.type === "section" ||
+                n.type === "column" ||
+                n.type === "hero"
+              ) {
                 const found = findInTree(n.children);
                 if (found) return found;
               }

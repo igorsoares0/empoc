@@ -128,7 +128,9 @@ export function Editor() {
     // Validation
     const validRoot = parentType === "root" && canBeRoot(childType);
     const validContainer =
-      (parentType === "section" || parentType === "column") &&
+      (parentType === "section" ||
+        parentType === "column" ||
+        parentType === "hero") &&
       canContain(parentType, childType);
     if (!validRoot && !validContainer) return;
 

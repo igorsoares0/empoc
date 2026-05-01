@@ -273,6 +273,125 @@ function ImageForm({
   );
 }
 
+function HeroForm({
+  node,
+}: {
+  node: Extract<EmailNode, { type: "hero" }>;
+}) {
+  const updateNode = useEditorStore((s) => s.updateNode);
+  const update = (patch: Record<string, unknown>) => updateNode(node.id, patch);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const result = await processImageFile(file);
+      update({ backgroundUrl: result.dataUrl });
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Falha no upload");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <Field label="Imagem de fundo (upload)">
+        <div className="flex flex-col gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:border-blue-400 hover:bg-blue-50 disabled:opacity-50"
+          >
+            {uploading ? "Processando…" : "Escolher imagem"}
+          </button>
+          {uploadError ? (
+            <span className="text-[11px] text-red-600">{uploadError}</span>
+          ) : null}
+        </div>
+      </Field>
+      <Field label="URL da imagem de fundo">
+        <input
+          type="url"
+          value={node.props.backgroundUrl ?? ""}
+          onChange={(e) => update({ backgroundUrl: e.target.value })}
+          className={inputClass}
+        />
+      </Field>
+      <Field label="Cor de fundo (fallback)">
+        <ColorInput
+          value={node.props.backgroundColor}
+          onChange={(v) => update({ backgroundColor: v })}
+        />
+      </Field>
+      <Field label="Posição do fundo">
+        <input
+          type="text"
+          value={node.props.backgroundPosition ?? ""}
+          onChange={(e) => update({ backgroundPosition: e.target.value })}
+          placeholder="center center"
+          className={inputClass}
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Modo">
+          <select
+            value={node.props.mode ?? "fluid-height"}
+            onChange={(e) => update({ mode: e.target.value })}
+            className={inputClass}
+          >
+            <option value="fluid-height">Fluido</option>
+            <option value="fixed-height">Altura fixa</option>
+          </select>
+        </Field>
+        <Field label="Altura">
+          <input
+            type="text"
+            value={node.props.height ?? ""}
+            onChange={(e) => update({ height: e.target.value })}
+            placeholder="400px"
+            className={inputClass}
+          />
+        </Field>
+      </div>
+      <Field label="Alinhamento vertical">
+        <select
+          value={node.props.verticalAlign ?? "middle"}
+          onChange={(e) => update({ verticalAlign: e.target.value })}
+          className={inputClass}
+        >
+          <option value="top">Topo</option>
+          <option value="middle">Meio</option>
+          <option value="bottom">Fundo</option>
+        </select>
+      </Field>
+      <Field label="Padding">
+        <input
+          type="text"
+          value={node.props.padding ?? ""}
+          onChange={(e) => update({ padding: e.target.value })}
+          placeholder="80px 24px"
+          className={inputClass}
+        />
+      </Field>
+    </div>
+  );
+}
+
 function NodeForm({ node }: { node: EmailNode }) {
   const updateNode = useEditorStore((s) => s.updateNode);
   const update = (patch: Record<string, unknown>) => updateNode(node.id, patch);
@@ -490,6 +609,10 @@ function NodeForm({ node }: { node: EmailNode }) {
         </Field>
       </div>
     );
+  }
+
+  if (node.type === "hero") {
+    return <HeroForm node={node} />;
   }
 
   if (node.type === "column") {
