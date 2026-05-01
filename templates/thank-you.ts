@@ -67,7 +67,7 @@ export const thankYou: Template = {
                 content: "THANK YOU FOR\nYOUR ORDER",
                 color: "#1a1a1a",
                 fontFamily: SERIF,
-                fontSize: "44px",
+                fontSize: "38px",
                 fontWeight: "bold",
                 letterSpacing: "1px",
                 lineHeight: "1.1",

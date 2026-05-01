@@ -33,7 +33,7 @@ export const promotional: Template = {
               props: {
                 content: "50% OFF",
                 color: "#ffffff",
-                fontSize: "56px",
+                fontSize: "44px",
                 align: "center",
                 fontWeight: "bold",
               },
