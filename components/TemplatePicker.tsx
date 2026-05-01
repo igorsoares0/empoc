@@ -90,6 +90,8 @@ function gradientForTemplate(id: string): string {
       return "linear-gradient(135deg,#494D3E,#EDE8E2)";
     case "qna":
       return "linear-gradient(135deg,#dcd3c4,#2a2725)";
+    case "back-in-stock":
+      return "linear-gradient(135deg,#efeeea,#352820)";
     default:
       return "linear-gradient(135deg,#71717a,#27272a)";
   }
@@ -109,6 +111,8 @@ function iconForTemplate(id: string): string {
       return "🌿";
     case "qna":
       return "❓";
+    case "back-in-stock":
+      return "🧥";
     default:
       return "✉️";
   }
