@@ -81,7 +81,7 @@ function gradientForTemplate(id: string): string {
     case "welcome":
       return "linear-gradient(135deg,#efeeea,#8a6f54)";
     case "newsletter":
-      return "linear-gradient(135deg,#0f172a,#0ea5e9)";
+      return "linear-gradient(135deg,#f6f4ef,#3a2c22)";
     case "promotional":
       return "linear-gradient(135deg,#dc2626,#f97316)";
     case "thank-you":
