@@ -79,7 +79,7 @@ export function TemplatePicker({ onClose }: Props) {
 function gradientForTemplate(id: string): string {
   switch (id) {
     case "welcome":
-      return "linear-gradient(135deg,#3b82f6,#1e3a8a)";
+      return "linear-gradient(135deg,#efeeea,#8a6f54)";
     case "newsletter":
       return "linear-gradient(135deg,#0f172a,#0ea5e9)";
     case "promotional":
@@ -106,7 +106,7 @@ function gradientForTemplate(id: string): string {
 function iconForTemplate(id: string): string {
   switch (id) {
     case "welcome":
-      return "👋";
+      return "✿";
     case "newsletter":
       return "📰";
     case "promotional":
