@@ -11,6 +11,7 @@ import { welcomeEditorial } from "./welcome-editorial";
 import { skincare } from "./skincare";
 import { courseLaunch } from "./course-launch";
 import { founderLetter } from "./founder-letter";
+import { reEngagement } from "./re-engagement";
 
 export const templates: Template[] = [
   welcome,
@@ -25,6 +26,7 @@ export const templates: Template[] = [
   skincare,
   courseLaunch,
   founderLetter,
+  reEngagement,
 ];
 
 export function getTemplate(id: string): Template | undefined {
