@@ -13,6 +13,7 @@ import { courseLaunch } from "./course-launch";
 import { founderLetter } from "./founder-letter";
 import { reEngagement } from "./re-engagement";
 import { beautyMinimal } from "./beauty-minimal";
+import { influencer } from "./influencer";
 
 export const templates: Template[] = [
   welcome,
@@ -29,6 +30,7 @@ export const templates: Template[] = [
   founderLetter,
   reEngagement,
   beautyMinimal,
+  influencer,
 ];
 
 export function getTemplate(id: string): Template | undefined {

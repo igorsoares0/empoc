@@ -106,6 +106,8 @@ function gradientForTemplate(id: string): string {
       return "linear-gradient(135deg,#faeede,#7a4530)";
     case "beauty-minimal":
       return "linear-gradient(135deg,#ebe6dd,#1a1a1a)";
+    case "influencer":
+      return "linear-gradient(135deg,#faf3eb,#c98b76)";
     default:
       return "linear-gradient(135deg,#71717a,#27272a)";
   }
@@ -141,6 +143,8 @@ function iconForTemplate(id: string): string {
       return "❀";
     case "beauty-minimal":
       return "Æ";
+    case "influencer":
+      return "♡";
     default:
       return "✉️";
   }
