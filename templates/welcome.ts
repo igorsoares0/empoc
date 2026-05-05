@@ -143,7 +143,7 @@ export const welcome: Template = {
     {
       id: "w-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "8px 220px 8px" },
+      props: { backgroundColor: CREAM, padding: "8px 24px 8px" },
       children: [
         {
           id: "w-divider-col",
@@ -156,7 +156,7 @@ export const welcome: Template = {
               props: {
                 borderColor: WARM,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

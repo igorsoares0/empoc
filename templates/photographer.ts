@@ -266,7 +266,7 @@ export const photographer: Template = {
     {
       id: "ph-rule-section",
       type: "section",
-      props: { backgroundColor: PAPER, padding: "0 220px 32px" },
+      props: { backgroundColor: PAPER, padding: "0 24px 32px" },
       children: [
         {
           id: "ph-rule-col",
@@ -279,7 +279,7 @@ export const photographer: Template = {
               props: {
                 borderColor: GRAPHITE,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

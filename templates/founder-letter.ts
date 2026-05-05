@@ -355,7 +355,7 @@ export const founderLetter: Template = {
     {
       id: "fl-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "32px 220px 24px" },
+      props: { backgroundColor: CREAM, padding: "32px 24px 24px" },
       children: [
         {
           id: "fl-divider-col",
@@ -368,7 +368,7 @@ export const founderLetter: Template = {
               props: {
                 borderColor: MAUVE,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

@@ -211,7 +211,7 @@ export const influencer: Template = {
     {
       id: "in-rule-section",
       type: "section",
-      props: { backgroundColor: IVORY, padding: "0 220px 16px" },
+      props: { backgroundColor: IVORY, padding: "0 24px 16px" },
       children: [
         {
           id: "in-rule-col",
@@ -224,7 +224,7 @@ export const influencer: Template = {
               props: {
                 borderColor: DUSTY,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

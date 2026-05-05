@@ -234,7 +234,7 @@ export const plainLetter: Template = {
     {
       id: "pl-rule-section",
       type: "section",
-      props: { backgroundColor: PAPER, padding: "16px 320px 24px" },
+      props: { backgroundColor: PAPER, padding: "16px 60px 24px" },
       children: [
         {
           id: "pl-rule-col",
@@ -247,7 +247,7 @@ export const plainLetter: Template = {
               props: {
                 borderColor: INK,
                 borderWidth: "1px",
-                width: "100%",
+                width: "60px",
               },
             },
           ],

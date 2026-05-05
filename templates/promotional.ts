@@ -476,7 +476,7 @@ export const promotional: Template = {
     {
       id: "p-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "24px 220px 8px" },
+      props: { backgroundColor: CREAM, padding: "24px 24px 8px" },
       children: [
         {
           id: "p-divider-col",
@@ -489,7 +489,7 @@ export const promotional: Template = {
               props: {
                 borderColor: OLIVE,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

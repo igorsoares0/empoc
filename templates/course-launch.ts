@@ -342,7 +342,7 @@ export const courseLaunch: Template = {
     {
       id: "cl-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "16px 220px 16px" },
+      props: { backgroundColor: CREAM, padding: "16px 24px 16px" },
       children: [
         {
           id: "cl-divider-col",
@@ -355,7 +355,7 @@ export const courseLaunch: Template = {
               props: {
                 borderColor: TERRA,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

@@ -163,7 +163,7 @@ export const beautyMinimal: Template = {
     {
       id: "bm-rule-section",
       type: "section",
-      props: { backgroundColor: BONE, padding: "56px 240px 0" },
+      props: { backgroundColor: BONE, padding: "56px 24px 0" },
       children: [
         {
           id: "bm-rule-col",
@@ -176,7 +176,7 @@ export const beautyMinimal: Template = {
               props: {
                 borderColor: INK,
                 borderWidth: "1px",
-                width: "100%",
+                width: "100px",
               },
             },
           ],

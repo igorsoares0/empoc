@@ -255,7 +255,7 @@ export const newsletter: Template = {
     {
       id: "n-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "0 220px 24px" },
+      props: { backgroundColor: CREAM, padding: "0 24px 24px" },
       children: [
         {
           id: "n-divider-col",
@@ -268,7 +268,7 @@ export const newsletter: Template = {
               props: {
                 borderColor: WARM,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

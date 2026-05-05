@@ -305,7 +305,7 @@ export const reEngagement: Template = {
     {
       id: "re-divider-section",
       type: "section",
-      props: { backgroundColor: CREAM, padding: "8px 220px 16px" },
+      props: { backgroundColor: CREAM, padding: "8px 24px 16px" },
       children: [
         {
           id: "re-divider-col",
@@ -318,7 +318,7 @@ export const reEngagement: Template = {
               props: {
                 borderColor: AMBER,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],

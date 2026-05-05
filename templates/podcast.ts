@@ -298,7 +298,7 @@ export const podcast: Template = {
     {
       id: "pc-rule-section",
       type: "section",
-      props: { backgroundColor: INK, padding: "20px 220px 0" },
+      props: { backgroundColor: INK, padding: "20px 24px 0" },
       children: [
         {
           id: "pc-rule-col",
@@ -311,7 +311,7 @@ export const podcast: Template = {
               props: {
                 borderColor: GOLD,
                 borderWidth: "1px",
-                width: "100%",
+                width: "120px",
               },
             },
           ],
