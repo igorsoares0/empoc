@@ -112,6 +112,8 @@ function gradientForTemplate(id: string): string {
       return "linear-gradient(135deg,#0e0d0c,#c9a663)";
     case "photographer":
       return "linear-gradient(135deg,#f5f1e8,#1f1d1a)";
+    case "plain-letter":
+      return "linear-gradient(135deg,#fbf9f4,#7a7268)";
     default:
       return "linear-gradient(135deg,#71717a,#27272a)";
   }
@@ -153,6 +155,8 @@ function iconForTemplate(id: string): string {
       return "🎙️";
     case "photographer":
       return "◐";
+    case "plain-letter":
+      return "¶";
     default:
       return "✉️";
   }

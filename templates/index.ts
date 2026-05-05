@@ -16,6 +16,7 @@ import { beautyMinimal } from "./beauty-minimal";
 import { influencer } from "./influencer";
 import { podcast } from "./podcast";
 import { photographer } from "./photographer";
+import { plainLetter } from "./plain-letter";
 
 export const templates: Template[] = [
   welcome,
@@ -35,6 +36,7 @@ export const templates: Template[] = [
   influencer,
   podcast,
   photographer,
+  plainLetter,
 ];
 
 export function getTemplate(id: string): Template | undefined {
