@@ -15,6 +15,7 @@ import { reEngagement } from "./re-engagement";
 import { beautyMinimal } from "./beauty-minimal";
 import { influencer } from "./influencer";
 import { podcast } from "./podcast";
+import { photographer } from "./photographer";
 
 export const templates: Template[] = [
   welcome,
@@ -33,6 +34,7 @@ export const templates: Template[] = [
   beautyMinimal,
   influencer,
   podcast,
+  photographer,
 ];
 
 export function getTemplate(id: string): Template | undefined {

@@ -110,6 +110,8 @@ function gradientForTemplate(id: string): string {
       return "linear-gradient(135deg,#faf3eb,#c98b76)";
     case "podcast":
       return "linear-gradient(135deg,#0e0d0c,#c9a663)";
+    case "photographer":
+      return "linear-gradient(135deg,#f5f1e8,#1f1d1a)";
     default:
       return "linear-gradient(135deg,#71717a,#27272a)";
   }
@@ -149,6 +151,8 @@ function iconForTemplate(id: string): string {
       return "♡";
     case "podcast":
       return "🎙️";
+    case "photographer":
+      return "◐";
     default:
       return "✉️";
   }
