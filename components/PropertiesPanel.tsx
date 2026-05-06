@@ -7,6 +7,14 @@ import { findNode } from "@/lib/treeOps";
 import { BLOCK_LABELS } from "@/lib/defaults";
 import { FONTS } from "@/lib/fonts";
 import { processImageFile, parsePx } from "@/lib/imageUpload";
+import {
+  PaddingInput,
+  PxInput,
+  NumberInput,
+  WidthInput,
+  BorderInput,
+  BackgroundPositionInput,
+} from "./PropertyInputs";
 import type { EmailNode, NavbarLink } from "@/types/email";
 
 function Field({
@@ -339,12 +347,9 @@ function HeroForm({
         />
       </Field>
       <Field label="Posição do fundo">
-        <input
-          type="text"
-          value={node.props.backgroundPosition ?? ""}
-          onChange={(e) => update({ backgroundPosition: e.target.value })}
-          placeholder="center center"
-          className={inputClass}
+        <BackgroundPositionInput
+          value={node.props.backgroundPosition}
+          onChange={(v) => update({ backgroundPosition: v })}
         />
       </Field>
       <div className="grid grid-cols-2 gap-3">
@@ -359,12 +364,13 @@ function HeroForm({
           </select>
         </Field>
         <Field label="Altura">
-          <input
-            type="text"
-            value={node.props.height ?? ""}
-            onChange={(e) => update({ height: e.target.value })}
-            placeholder="400px"
-            className={inputClass}
+          <PxInput
+            value={node.props.height}
+            onChange={(v) => update({ height: v })}
+            min={80}
+            max={1000}
+            step={10}
+            placeholder="400"
           />
         </Field>
       </div>
@@ -380,12 +386,10 @@ function HeroForm({
         </select>
       </Field>
       <Field label="Padding">
-        <input
-          type="text"
-          value={node.props.padding ?? ""}
-          onChange={(e) => update({ padding: e.target.value })}
-          placeholder="80px 24px"
-          className={inputClass}
+        <PaddingInput
+          value={node.props.padding}
+          onChange={(v) => update({ padding: v })}
+          max={300}
         />
       </Field>
     </div>
@@ -424,12 +428,13 @@ function NodeForm({ node }: { node: EmailNode }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Tamanho">
-            <input
-              type="text"
-              value={node.props.fontSize ?? ""}
-              onChange={(e) => update({ fontSize: e.target.value })}
-              placeholder="16px"
-              className={inputClass}
+            <PxInput
+              value={node.props.fontSize}
+              onChange={(v) => update({ fontSize: v })}
+              min={8}
+              max={140}
+              step={1}
+              placeholder="16"
             />
           </Field>
           <Field label="Peso">
@@ -443,21 +448,23 @@ function NodeForm({ node }: { node: EmailNode }) {
             </select>
           </Field>
           <Field label="Espaç. letra">
-            <input
-              type="text"
-              value={node.props.letterSpacing ?? ""}
-              onChange={(e) => update({ letterSpacing: e.target.value })}
+            <PxInput
+              value={node.props.letterSpacing}
+              onChange={(v) => update({ letterSpacing: v })}
+              min={-5}
+              max={20}
+              step={0.5}
               placeholder="0"
-              className={inputClass}
             />
           </Field>
           <Field label="Altura linha">
-            <input
-              type="text"
-              value={node.props.lineHeight ?? ""}
-              onChange={(e) => update({ lineHeight: e.target.value })}
+            <NumberInput
+              value={node.props.lineHeight}
+              onChange={(v) => update({ lineHeight: v })}
+              min={0.8}
+              max={3}
+              step={0.05}
               placeholder="1.5"
-              className={inputClass}
             />
           </Field>
         </div>
@@ -519,12 +526,13 @@ function NodeForm({ node }: { node: EmailNode }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Tamanho">
-            <input
-              type="text"
-              value={node.props.fontSize ?? ""}
-              onChange={(e) => update({ fontSize: e.target.value })}
-              placeholder="14px"
-              className={inputClass}
+            <PxInput
+              value={node.props.fontSize}
+              onChange={(v) => update({ fontSize: v })}
+              min={8}
+              max={48}
+              step={1}
+              placeholder="14"
             />
           </Field>
           <Field label="Peso">
@@ -538,40 +546,37 @@ function NodeForm({ node }: { node: EmailNode }) {
             </select>
           </Field>
           <Field label="Espaç. letra">
-            <input
-              type="text"
-              value={node.props.letterSpacing ?? ""}
-              onChange={(e) => update({ letterSpacing: e.target.value })}
+            <PxInput
+              value={node.props.letterSpacing}
+              onChange={(v) => update({ letterSpacing: v })}
+              min={-5}
+              max={20}
+              step={0.5}
               placeholder="0"
-              className={inputClass}
             />
           </Field>
-          <Field label="Padding interno">
-            <input
-              type="text"
-              value={node.props.innerPadding ?? ""}
-              onChange={(e) => update({ innerPadding: e.target.value })}
-              placeholder="12px 24px"
-              className={inputClass}
+          <Field label="Border radius">
+            <PxInput
+              value={node.props.borderRadius}
+              onChange={(v) => update({ borderRadius: v })}
+              min={0}
+              max={60}
+              step={1}
+              placeholder="4"
             />
           </Field>
         </div>
-        <Field label="Borda" hint="Ex.: 1px solid #000 — vazio = sem borda">
-          <input
-            type="text"
-            value={node.props.border ?? ""}
-            onChange={(e) => update({ border: e.target.value })}
-            placeholder="1px solid #000"
-            className={inputClass}
+        <Field label="Padding interno">
+          <PaddingInput
+            value={node.props.innerPadding}
+            onChange={(v) => update({ innerPadding: v })}
+            max={60}
           />
         </Field>
-        <Field label="Border radius">
-          <input
-            type="text"
-            value={node.props.borderRadius ?? ""}
-            onChange={(e) => update({ borderRadius: e.target.value })}
-            placeholder="4px"
-            className={inputClass}
+        <Field label="Borda">
+          <BorderInput
+            value={node.props.border}
+            onChange={(v) => update({ border: v })}
           />
         </Field>
         <Field label="Alinhamento">
@@ -599,12 +604,10 @@ function NodeForm({ node }: { node: EmailNode }) {
           />
         </Field>
         <Field label="Padding">
-          <input
-            type="text"
-            value={node.props.padding ?? ""}
-            onChange={(e) => update({ padding: e.target.value })}
-            placeholder="20px 0"
-            className={inputClass}
+          <PaddingInput
+            value={node.props.padding}
+            onChange={(v) => update({ padding: v })}
+            max={300}
           />
         </Field>
       </div>
@@ -619,12 +622,10 @@ function NodeForm({ node }: { node: EmailNode }) {
     return (
       <div className="flex flex-col gap-3">
         <Field label="Largura">
-          <input
-            type="text"
-            value={node.props.width ?? ""}
-            onChange={(e) => update({ width: e.target.value })}
-            placeholder="auto"
-            className={inputClass}
+          <WidthInput
+            value={node.props.width}
+            onChange={(v) => update({ width: v })}
+            allowAuto
           />
         </Field>
         <Field label="Alinhamento vertical">
@@ -645,12 +646,13 @@ function NodeForm({ node }: { node: EmailNode }) {
   if (node.type === "spacer") {
     return (
       <Field label="Altura">
-        <input
-          type="text"
-          value={node.props.height ?? ""}
-          onChange={(e) => update({ height: e.target.value })}
-          placeholder="24px"
-          className={inputClass}
+        <PxInput
+          value={node.props.height}
+          onChange={(v) => update({ height: v })}
+          min={4}
+          max={200}
+          step={2}
+          placeholder="24"
         />
       </Field>
     );
@@ -667,12 +669,13 @@ function NodeForm({ node }: { node: EmailNode }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Espessura">
-            <input
-              type="text"
-              value={node.props.borderWidth ?? ""}
-              onChange={(e) => update({ borderWidth: e.target.value })}
-              placeholder="1px"
-              className={inputClass}
+            <PxInput
+              value={node.props.borderWidth}
+              onChange={(v) => update({ borderWidth: v })}
+              min={0}
+              max={20}
+              step={1}
+              placeholder="1"
             />
           </Field>
           <Field label="Estilo">
@@ -688,21 +691,17 @@ function NodeForm({ node }: { node: EmailNode }) {
           </Field>
         </div>
         <Field label="Largura">
-          <input
-            type="text"
-            value={node.props.width ?? ""}
-            onChange={(e) => update({ width: e.target.value })}
-            placeholder="100%"
-            className={inputClass}
+          <WidthInput
+            value={node.props.width}
+            onChange={(v) => update({ width: v })}
+            pxMax={600}
           />
         </Field>
         <Field label="Padding">
-          <input
-            type="text"
-            value={node.props.padding ?? ""}
-            onChange={(e) => update({ padding: e.target.value })}
-            placeholder="10px 0"
-            className={inputClass}
+          <PaddingInput
+            value={node.props.padding}
+            onChange={(v) => update({ padding: v })}
+            max={100}
           />
         </Field>
       </div>
@@ -783,12 +782,13 @@ function NodeForm({ node }: { node: EmailNode }) {
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Tamanho">
-            <input
-              type="text"
-              value={node.props.fontSize ?? ""}
-              onChange={(e) => update({ fontSize: e.target.value })}
-              placeholder="14px"
-              className={inputClass}
+            <PxInput
+              value={node.props.fontSize}
+              onChange={(v) => update({ fontSize: v })}
+              min={8}
+              max={32}
+              step={1}
+              placeholder="14"
             />
           </Field>
           <Field label="Peso">
@@ -802,24 +802,23 @@ function NodeForm({ node }: { node: EmailNode }) {
             </select>
           </Field>
           <Field label="Espaç. letra">
-            <input
-              type="text"
-              value={node.props.letterSpacing ?? ""}
-              onChange={(e) => update({ letterSpacing: e.target.value })}
-              placeholder="1px"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Padding">
-            <input
-              type="text"
-              value={node.props.padding ?? ""}
-              onChange={(e) => update({ padding: e.target.value })}
-              placeholder="10px 0"
-              className={inputClass}
+            <PxInput
+              value={node.props.letterSpacing}
+              onChange={(v) => update({ letterSpacing: v })}
+              min={-2}
+              max={10}
+              step={0.5}
+              placeholder="1"
             />
           </Field>
         </div>
+        <Field label="Padding">
+          <PaddingInput
+            value={node.props.padding}
+            onChange={(v) => update({ padding: v })}
+            max={100}
+          />
+        </Field>
         <Field label="Alinhamento">
           <select
             value={node.props.align ?? "center"}
