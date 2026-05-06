@@ -38,28 +38,37 @@ export function Preview() {
           {errors.length > 3 ? ` (+${errors.length - 3})` : ""}
         </div>
       ) : null}
-      <div className="flex items-center justify-center border-b border-zinc-200 bg-white px-4 py-2">
+      <div className="flex h-11 shrink-0 items-center justify-center border-b border-zinc-200 bg-white px-4">
         <div className="inline-flex rounded-md border border-zinc-200 bg-zinc-50 p-0.5 text-xs font-medium">
           <button
             type="button"
             onClick={() => setDevice("desktop")}
-            className={`rounded px-3 py-1 transition ${
+            className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 transition ${
               device === "desktop"
-                ? "bg-white text-zinc-900 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/60"
                 : "text-zinc-500 hover:text-zinc-700"
             }`}
           >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
             Desktop
           </button>
           <button
             type="button"
             onClick={() => setDevice("mobile")}
-            className={`rounded px-3 py-1 transition ${
+            className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 transition ${
               device === "mobile"
-                ? "bg-white text-zinc-900 shadow-sm"
+                ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/60"
                 : "text-zinc-500 hover:text-zinc-700"
             }`}
           >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" />
+              <line x1="12" y1="18" x2="12" y2="18" />
+            </svg>
             Mobile · 375px
           </button>
         </div>
