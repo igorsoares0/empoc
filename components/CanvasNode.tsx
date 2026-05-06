@@ -438,15 +438,26 @@ export function CanvasNode({ node }: Props) {
         {...attributes}
         {...listeners}
         onClick={handleClick}
-        className={`my-1 cursor-pointer rounded ${baseRing} ${
+        className={`group relative cursor-pointer ${baseRing} ${
           isDragging ? "opacity-40" : ""
         }`}
       >
         <div
           style={{ height: node.props.height ?? "24px" }}
-          className="flex items-center justify-center bg-zinc-50 text-[10px] uppercase tracking-wider text-zinc-400"
+          className="relative w-full"
         >
-          espaço · {node.props.height ?? "24px"}
+          <div
+            className={`pointer-events-none absolute inset-0 border border-dashed border-zinc-300/0 transition group-hover:border-zinc-300/70 ${
+              isSelected ? "border-zinc-300/70" : ""
+            }`}
+          />
+          <div
+            className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-zinc-900/70 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-white opacity-0 transition group-hover:opacity-100 ${
+              isSelected ? "opacity-100" : ""
+            }`}
+          >
+            espaço · {node.props.height ?? "24px"}
+          </div>
         </div>
       </div>
     );
