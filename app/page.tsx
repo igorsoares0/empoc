@@ -1,5 +1,5 @@
-import { Editor } from "@/components/Editor";
+import { Dashboard } from "@/components/Dashboard";
 
 export default function Home() {
-  return <Editor />;
+  return <Dashboard />;
 }

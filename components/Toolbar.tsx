@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useEditorStore } from "@/store/editorStore";
 import { renderTreeToHtml } from "@/app/actions/render";
 
@@ -8,9 +9,17 @@ type Props = {
   view: "edit" | "preview";
   onViewChange: (view: "edit" | "preview") => void;
   onChangeTemplate: () => void;
+  projectName: string;
+  onRenameProject: (name: string) => void;
 };
 
-export function Toolbar({ view, onViewChange, onChangeTemplate }: Props) {
+export function Toolbar({
+  view,
+  onViewChange,
+  onChangeTemplate,
+  projectName,
+  onRenameProject,
+}: Props) {
   const tree = useEditorStore((s) => s.tree);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
@@ -41,17 +50,24 @@ export function Toolbar({ view, onViewChange, onChangeTemplate }: Props) {
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 text-[11px] font-bold text-white">
-            e
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
-            empoc
-          </span>
-        </div>
-        <span className="h-5 w-px bg-zinc-200" />
-        <div className="flex items-center gap-0.5">
+      <div className="flex min-w-0 items-center gap-3">
+        <Link
+          href="/"
+          title="Voltar ao dashboard"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-[12px] font-bold text-white transition-transform hover:scale-105"
+        >
+          e
+        </Link>
+        <span className="hidden h-5 w-px bg-zinc-200 sm:block" />
+        <input
+          type="text"
+          value={projectName}
+          onChange={(e) => onRenameProject(e.target.value)}
+          className="min-w-0 max-w-[260px] truncate rounded-md border border-transparent bg-transparent px-2 py-1 text-[14px] font-medium text-zinc-900 outline-none transition-colors hover:bg-zinc-100 focus:border-zinc-300 focus:bg-white"
+          aria-label="Nome do email"
+        />
+        <span className="hidden h-5 w-px bg-zinc-200 sm:block" />
+        <div className="hidden items-center gap-0.5 sm:flex">
           <button
             type="button"
             onClick={undo}

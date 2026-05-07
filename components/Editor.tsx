@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
@@ -11,6 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { useEditorStore } from "@/store/editorStore";
+import { useProjectsStore } from "@/store/projectsStore";
 import { canBeRoot, canContain, findNode } from "@/lib/treeOps";
 import { createNode, BLOCK_LABELS } from "@/lib/defaults";
 import type { NodeType } from "@/types/email";
@@ -22,7 +24,8 @@ import { Toolbar } from "./Toolbar";
 import { TemplatePicker } from "./TemplatePicker";
 import { EditorFonts } from "./EditorFonts";
 
-export function Editor() {
+export function Editor({ projectId }: { projectId: string }) {
+  const router = useRouter();
   const tree = useEditorStore((s) => s.tree);
   const addNode = useEditorStore((s) => s.addNode);
   const moveNode = useEditorStore((s) => s.moveNode);
@@ -32,21 +35,55 @@ export function Editor() {
   const redo = useEditorStore((s) => s.redo);
   const past = useEditorStore((s) => s.past);
   const future = useEditorStore((s) => s.future);
+  const loadTree = useEditorStore((s) => s.loadTree);
+
+  const project = useProjectsStore((s) =>
+    s.projects.find((p) => p.id === projectId),
+  );
+  const updateProjectTree = useProjectsStore((s) => s.updateProjectTree);
+  const renameProject = useProjectsStore((s) => s.renameProject);
 
   const [view, setView] = useState<"edit" | "preview">("edit");
-  const [pickerDismissed, setPickerDismissed] = useState(false);
-  const [activeDrag, setActiveDrag] = useState<{
-    label: string;
-  } | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [activeDrag, setActiveDrag] = useState<{ label: string } | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
-  const hydrated = useSyncExternalStore(
-    (cb) => useEditorStore.persist.onFinishHydration(cb),
-    () => useEditorStore.persist.hasHydrated(),
-    () => false,
-  );
+  const hydratedForRef = useRef<string | null>(null);
 
-  const showTemplatePicker =
-    hydrated && tree.length === 0 && !pickerDismissed;
+  // Hydrate editor store from project on mount or projectId change
+  useEffect(() => {
+    if (!project) return;
+    if (hydratedForRef.current === projectId) return;
+    hydratedForRef.current = projectId;
+    loadTree(project.tree);
+    setHydrated(true);
+  }, [projectId, project, loadTree]);
+
+  // Redirect to dashboard if project doesn't exist (after stores hydrate)
+  useEffect(() => {
+    const unsub = useProjectsStore.persist.onFinishHydration(() => {
+      const exists = useProjectsStore
+        .getState()
+        .projects.some((p) => p.id === projectId);
+      if (!exists) router.replace("/");
+    });
+    if (useProjectsStore.persist.hasHydrated()) {
+      const exists = useProjectsStore
+        .getState()
+        .projects.some((p) => p.id === projectId);
+      if (!exists) router.replace("/");
+    }
+    return unsub;
+  }, [projectId, router]);
+
+  // Sync tree changes back to project (debounced)
+  useEffect(() => {
+    if (!hydrated || hydratedForRef.current !== projectId) return;
+    const t = setTimeout(() => {
+      updateProjectTree(projectId, tree);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [tree, projectId, hydrated, updateProjectTree]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -112,7 +149,6 @@ export function Editor() {
       | undefined;
     if (!activeData || !overData) return;
 
-    // Determine target parent type
     let parentType: NodeType | "root" = "root";
     if (overData.kind === "container") {
       parentType = overData.nodeType ?? "root";
@@ -124,8 +160,6 @@ export function Editor() {
     }
 
     const childType = activeData.nodeType;
-
-    // Validation
     const validRoot = parentType === "root" && canBeRoot(childType);
     const validContainer =
       (parentType === "section" ||
@@ -134,16 +168,12 @@ export function Editor() {
       canContain(parentType, childType);
     if (!validRoot && !validContainer) return;
 
-    const targetParentId =
-      overData.kind === "container" && overData.parentId !== null
-        ? overData.parentId
-        : overData.parentId; // null for root, or parentId for between
+    const targetParentId = overData.parentId;
     const targetIndex = overData.kind === "between" ? overData.index : undefined;
 
     if (activeData.source === "palette") {
       addNode(targetParentId, createNode(childType), targetIndex);
     } else if (activeData.source === "tree" && activeData.nodeId) {
-      // Avoid moving onto self/descendant
       if (targetParentId === activeData.nodeId) return;
       moveNode(activeData.nodeId, targetParentId, targetIndex ?? 0);
     }
@@ -161,7 +191,9 @@ export function Editor() {
         <Toolbar
           view={view}
           onViewChange={setView}
-          onChangeTemplate={() => setPickerDismissed(false)}
+          onChangeTemplate={() => setShowPicker(true)}
+          projectName={project?.name ?? "Carregando…"}
+          onRenameProject={(name) => renameProject(projectId, name)}
         />
         <div className="flex flex-1 overflow-hidden">
           {view === "edit" ? <BlocksPanel /> : null}
@@ -171,13 +203,13 @@ export function Editor() {
       </div>
       <DragOverlay>
         {activeDrag ? (
-          <div className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-lg">
+          <div className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white shadow-lg">
             {activeDrag.label}
           </div>
         ) : null}
       </DragOverlay>
-      {showTemplatePicker ? (
-        <TemplatePicker onClose={() => setPickerDismissed(true)} />
+      {showPicker ? (
+        <TemplatePicker onClose={() => setShowPicker(false)} />
       ) : null}
     </DndContext>
   );

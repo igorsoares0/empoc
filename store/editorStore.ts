@@ -19,6 +19,7 @@ type EditorState = {
   past: EmailNode[][];
   future: EmailNode[][];
   setTree: (tree: EmailNode[]) => void;
+  loadTree: (tree: EmailNode[]) => void;
   addNode: (
     parentId: NodeId | null,
     node: EmailNode,
@@ -63,6 +64,15 @@ export const useEditorStore = create<EditorState>()(
           tree: cloneTree(tree),
           selectedId: null,
         })),
+
+      loadTree: (tree) =>
+        set({
+          tree: cloneTree(tree),
+          past: [],
+          future: [],
+          selectedId: null,
+          editingId: null,
+        }),
 
       addNode: (parentId, node, index) =>
         set((state) => ({
@@ -185,7 +195,7 @@ export const useEditorStore = create<EditorState>()(
     {
       name: "empoc-editor",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ tree: state.tree }),
+      partialize: () => ({}),
     },
   ),
 );
