@@ -1,29 +1,34 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { templates } from "@/templates";
-import { useProjectsStore } from "@/store/projectsStore";
 import { gradientForTemplate, iconForTemplate } from "@/lib/templateVisuals";
+import {
+  createProject,
+  deleteProject,
+  duplicateProject,
+  renameProject,
+  type ProjectSummary,
+} from "@/app/actions/projects";
+import { AppHeader } from "@/components/AppHeader";
 
 const CATEGORIES = ["Todos", ...new Set(templates.map((t) => t.category))];
 
-export function Dashboard() {
+type Props = {
+  initialProjects: ProjectSummary[];
+  userName: string;
+  userEmail: string;
+};
+
+export function Dashboard({ initialProjects, userName, userEmail }: Props) {
   const router = useRouter();
-  const projects = useProjectsStore((s) => s.projects);
-  const createProject = useProjectsStore((s) => s.createProject);
-  const deleteProject = useProjectsStore((s) => s.deleteProject);
-  const duplicateProject = useProjectsStore((s) => s.duplicateProject);
-  const renameProject = useProjectsStore((s) => s.renameProject);
+  const [projects, setProjects] = useState<ProjectSummary[]>(initialProjects);
+  const [, startTransition] = useTransition();
+  const [busy, setBusy] = useState(false);
 
   const [category, setCategory] = useState<string>("Todos");
   const [query, setQuery] = useState("");
-
-  const hydrated = useSyncExternalStore(
-    (cb) => useProjectsStore.persist.onFinishHydration(cb),
-    () => useProjectsStore.persist.hasHydrated(),
-    () => false,
-  );
 
   const visibleTemplates = useMemo(() => {
     return templates.filter((t) => {
@@ -45,30 +50,76 @@ export function Dashboard() {
     [projects],
   );
 
-  function openBlank() {
-    const id = createProject({ name: "Email sem título" });
-    router.push(`/editor/${id}`);
+  async function openBlank() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const id = await createProject({ name: "Email sem título" });
+      router.push(`/editor/${id}`);
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function openTemplate(templateId: string) {
+  async function openTemplate(templateId: string) {
+    if (busy) return;
     const template = templates.find((t) => t.id === templateId);
     if (!template) return;
-    const id = createProject({
-      name: template.name,
-      templateId: template.id,
-      tree: template.tree,
+    setBusy(true);
+    try {
+      const id = await createProject({
+        name: template.name,
+        templateId: template.id,
+        tree: template.tree,
+      });
+      router.push(`/editor/${id}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onRename(id: string, name: string) {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, name, updatedAt: Date.now() } : p)),
+    );
+    startTransition(async () => {
+      await renameProject(id, name);
     });
-    router.push(`/editor/${id}`);
+  }
+
+  async function onDelete(id: string) {
+    const target = projects.find((p) => p.id === id);
+    if (!target) return;
+    if (!confirm(`Excluir "${target.name}"?`)) return;
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    startTransition(async () => {
+      await deleteProject(id);
+    });
+  }
+
+  async function onDuplicate(id: string) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const newId = await duplicateProject(id);
+      if (newId) router.push(`/editor/${newId}`);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <DashboardHeader onNew={openBlank} />
+      <AppHeader
+        userName={userName}
+        userEmail={userEmail}
+        cta={{ label: "Novo email", onClick: openBlank, disabled: busy }}
+      />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-10">
         <section className="mb-10 flex flex-col gap-2">
           <h1 className="text-[28px] font-semibold tracking-tight text-zinc-900">
-            Bem-vinda de volta.
+            Bem-vinda de volta{firstName(userName) ? `, ${firstName(userName)}` : ""}.
           </h1>
           <p className="text-[15px] text-zinc-500">
             Continue de onde parou ou comece algo novo a partir de um template.
@@ -76,15 +127,12 @@ export function Dashboard() {
         </section>
 
         <section className="mb-10 grid grid-cols-3 gap-3">
-          <Stat
-            label="Seus emails"
-            value={hydrated ? sortedProjects.length : "—"}
-          />
+          <Stat label="Seus emails" value={sortedProjects.length} />
           <Stat label="Templates" value={templates.length} />
           <Stat
             label="Última edição"
             value={
-              hydrated && sortedProjects[0]
+              sortedProjects[0]
                 ? formatRelative(sortedProjects[0].updatedAt)
                 : "—"
             }
@@ -100,7 +148,8 @@ export function Dashboard() {
             <button
               type="button"
               onClick={openBlank}
-              className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-zinc-800"
+              disabled={busy}
+              className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-60"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14" />
@@ -109,16 +158,7 @@ export function Dashboard() {
             </button>
           </div>
 
-          {!hydrated ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-[200px] animate-pulse rounded-xl bg-white ring-1 ring-zinc-200"
-                />
-              ))}
-            </div>
-          ) : sortedProjects.length === 0 ? (
+          {sortedProjects.length === 0 ? (
             <EmptyProjects onNew={openBlank} />
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -127,14 +167,9 @@ export function Dashboard() {
                   key={p.id}
                   project={p}
                   onOpen={() => router.push(`/editor/${p.id}`)}
-                  onRename={(name) => renameProject(p.id, name)}
-                  onDuplicate={() => {
-                    const newId = duplicateProject(p.id);
-                    if (newId) router.push(`/editor/${newId}`);
-                  }}
-                  onDelete={() => {
-                    if (confirm(`Excluir "${p.name}"?`)) deleteProject(p.id);
-                  }}
+                  onRename={(name) => onRename(p.id, name)}
+                  onDuplicate={() => onDuplicate(p.id)}
+                  onDelete={() => onDelete(p.id)}
                 />
               ))}
             </div>
@@ -199,7 +234,8 @@ export function Dashboard() {
                   key={t.id}
                   type="button"
                   onClick={() => openTemplate(t.id)}
-                  className="group flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white text-left transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md"
+                  disabled={busy}
+                  className="group flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white text-left transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-md disabled:opacity-60"
                 >
                   <div
                     className="flex h-28 items-center justify-center text-3xl"
@@ -229,41 +265,6 @@ export function Dashboard() {
         </footer>
       </main>
     </div>
-  );
-}
-
-function DashboardHeader({ onNew }: { onNew: () => void }) {
-  return (
-    <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-6">
-        <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-900 text-[12px] font-bold text-white">
-            e
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
-            empoc
-          </span>
-          <span className="ml-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-            beta
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onNew}
-            className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-zinc-800"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Novo email
-          </button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-[12px] font-semibold text-zinc-600">
-            I
-          </div>
-        </div>
-      </div>
-    </header>
   );
 }
 
@@ -299,7 +300,7 @@ function ProjectCard({
   onDuplicate,
   onDelete,
 }: {
-  project: { id: string; name: string; templateId: string | null; updatedAt: number };
+  project: ProjectSummary;
   onOpen: () => void;
   onRename: (name: string) => void;
   onDuplicate: () => void;
@@ -429,6 +430,10 @@ function EmptyProjects({ onNew }: { onNew: () => void }) {
       </button>
     </div>
   );
+}
+
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? "";
 }
 
 function formatRelative(timestamp: number): string {

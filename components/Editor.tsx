@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
@@ -12,10 +11,14 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { useEditorStore } from "@/store/editorStore";
-import { useProjectsStore } from "@/store/projectsStore";
 import { canBeRoot, canContain, findNode } from "@/lib/treeOps";
 import { createNode, BLOCK_LABELS } from "@/lib/defaults";
 import type { NodeType } from "@/types/email";
+import {
+  renameProject,
+  updateProjectTree,
+  type ProjectFull,
+} from "@/app/actions/projects";
 import { BlocksPanel } from "./BlocksPanel";
 import { Canvas } from "./Canvas";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -24,8 +27,7 @@ import { Toolbar } from "./Toolbar";
 import { TemplatePicker } from "./TemplatePicker";
 import { EditorFonts } from "./EditorFonts";
 
-export function Editor({ projectId }: { projectId: string }) {
-  const router = useRouter();
+export function Editor({ project }: { project: ProjectFull }) {
   const tree = useEditorStore((s) => s.tree);
   const addNode = useEditorStore((s) => s.addNode);
   const moveNode = useEditorStore((s) => s.moveNode);
@@ -37,53 +39,35 @@ export function Editor({ projectId }: { projectId: string }) {
   const future = useEditorStore((s) => s.future);
   const loadTree = useEditorStore((s) => s.loadTree);
 
-  const project = useProjectsStore((s) =>
-    s.projects.find((p) => p.id === projectId),
-  );
-  const updateProjectTree = useProjectsStore((s) => s.updateProjectTree);
-  const renameProject = useProjectsStore((s) => s.renameProject);
-
   const [view, setView] = useState<"edit" | "preview">("edit");
   const [showPicker, setShowPicker] = useState(false);
   const [activeDrag, setActiveDrag] = useState<{ label: string } | null>(null);
+  const [projectName, setProjectName] = useState(project.name);
   const [hydrated, setHydrated] = useState(false);
 
   const hydratedForRef = useRef<string | null>(null);
+  const lastSavedRef = useRef<string>("");
 
-  // Hydrate editor store from project on mount or projectId change
   useEffect(() => {
-    if (!project) return;
-    if (hydratedForRef.current === projectId) return;
-    hydratedForRef.current = projectId;
+    if (hydratedForRef.current === project.id) return;
+    hydratedForRef.current = project.id;
     loadTree(project.tree);
+    lastSavedRef.current = JSON.stringify(project.tree);
     setHydrated(true);
-  }, [projectId, project, loadTree]);
+  }, [project.id, project.tree, loadTree]);
 
-  // Redirect to dashboard if project doesn't exist (after stores hydrate)
   useEffect(() => {
-    const unsub = useProjectsStore.persist.onFinishHydration(() => {
-      const exists = useProjectsStore
-        .getState()
-        .projects.some((p) => p.id === projectId);
-      if (!exists) router.replace("/");
-    });
-    if (useProjectsStore.persist.hasHydrated()) {
-      const exists = useProjectsStore
-        .getState()
-        .projects.some((p) => p.id === projectId);
-      if (!exists) router.replace("/");
-    }
-    return unsub;
-  }, [projectId, router]);
-
-  // Sync tree changes back to project (debounced)
-  useEffect(() => {
-    if (!hydrated || hydratedForRef.current !== projectId) return;
+    if (!hydrated || hydratedForRef.current !== project.id) return;
     const t = setTimeout(() => {
-      updateProjectTree(projectId, tree);
-    }, 400);
+      const serialized = JSON.stringify(tree);
+      if (serialized === lastSavedRef.current) return;
+      lastSavedRef.current = serialized;
+      updateProjectTree(project.id, tree).catch(() => {
+        // swallow — user will see staleness on next reload; could surface a toast
+      });
+    }, 600);
     return () => clearTimeout(t);
-  }, [tree, projectId, hydrated, updateProjectTree]);
+  }, [tree, project.id, hydrated]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -179,6 +163,15 @@ export function Editor({ projectId }: { projectId: string }) {
     }
   }
 
+  function handleRename(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === projectName) return;
+    setProjectName(trimmed);
+    renameProject(project.id, trimmed).catch(() => {
+      setProjectName(projectName);
+    });
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -192,8 +185,8 @@ export function Editor({ projectId }: { projectId: string }) {
           view={view}
           onViewChange={setView}
           onChangeTemplate={() => setShowPicker(true)}
-          projectName={project?.name ?? "Carregando…"}
-          onRenameProject={(name) => renameProject(projectId, name)}
+          projectName={projectName}
+          onRenameProject={handleRename}
         />
         <div className="flex flex-1 overflow-hidden">
           {view === "edit" ? <BlocksPanel /> : null}
