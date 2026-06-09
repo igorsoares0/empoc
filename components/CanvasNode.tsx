@@ -136,17 +136,20 @@ export function CanvasNode({ node }: Props) {
       data: { source: "tree", nodeId: node.id, nodeType: node.type },
     });
 
+  const isDropContainer =
+    node.type === "section" || node.type === "column" || node.type === "hero";
+
   const { setNodeRef: setDropRef, isOver, active } = useDroppable({
     id: `container:${node.id}`,
     data: { kind: "container", parentId: node.id, nodeType: node.type },
-    disabled: node.type !== "section" && node.type !== "column",
+    disabled: !isDropContainer,
   });
 
   const containerActive = isOver && active;
 
   function ref(el: HTMLDivElement | null) {
     setDragRef(el);
-    if (node.type === "section" || node.type === "column") setDropRef(el);
+    if (isDropContainer) setDropRef(el);
   }
 
   function handleClick(e: React.MouseEvent) {
