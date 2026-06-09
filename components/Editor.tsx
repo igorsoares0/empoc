@@ -45,6 +45,7 @@ export function Editor({ project }: { project: ProjectFull }) {
   const addNode = useEditorStore((s) => s.addNode);
   const moveNode = useEditorStore((s) => s.moveNode);
   const duplicateNode = useEditorStore((s) => s.duplicateNode);
+  const deleteNode = useEditorStore((s) => s.deleteNode);
   const selectedId = useEditorStore((s) => s.selectedId);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
@@ -84,13 +85,23 @@ export function Editor({ project }: { project: ProjectFull }) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      const cmd = e.ctrlKey || e.metaKey;
-      if (!cmd) return;
       const target = e.target as HTMLElement | null;
       const isEditing =
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
         target?.isContentEditable;
+      const cmd = e.ctrlKey || e.metaKey;
+      if (!cmd) {
+        if (
+          (e.key === "Delete" || e.key === "Backspace") &&
+          !isEditing &&
+          selectedId
+        ) {
+          e.preventDefault();
+          deleteNode(selectedId);
+        }
+        return;
+      }
       if (e.key === "z" && !e.shiftKey) {
         if (past.length > 0) {
           e.preventDefault();
@@ -110,7 +121,7 @@ export function Editor({ project }: { project: ProjectFull }) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo, duplicateNode, past.length, future.length, selectedId]);
+  }, [undo, redo, duplicateNode, deleteNode, past.length, future.length, selectedId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
