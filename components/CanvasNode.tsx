@@ -184,14 +184,28 @@ export function CanvasNode({ node }: Props) {
           ) : (
             <>
               <DropZone parentId={node.id} index={0} axis="x" />
-              {node.children.map((child, i) => (
+              {node.children.map((child, i) => {
+                // Mirror MJML's mj-column sizing on the canvas so the editor is
+                // WYSIWYG: an explicit width (px/%) becomes a fixed flex-basis;
+                // "auto"/unset columns share the remaining space equally.
+                const w =
+                  child.type === "column" &&
+                  child.props.width &&
+                  child.props.width !== "auto"
+                    ? child.props.width
+                    : null;
+                const flexStyle: React.CSSProperties = w
+                  ? { flexGrow: 0, flexShrink: 0, flexBasis: w, maxWidth: w }
+                  : { flex: "1 1 0%" };
+                return (
                 <Fragment key={child.id}>
-                  <div className="flex-1">
+                  <div className="min-w-0" style={flexStyle}>
                     <CanvasNode node={child} />
                   </div>
                   <DropZone parentId={node.id} index={i + 1} axis="x" />
                 </Fragment>
-              ))}
+                );
+              })}
             </>
           )}
         </div>

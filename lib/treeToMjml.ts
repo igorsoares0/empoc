@@ -22,7 +22,44 @@ function attr(name: string, value: string | undefined): string {
   return ` ${name}="${escapeAttr(String(value))}"`;
 }
 
-function nodeToMjml(node: EmailNode): string {
+// MJML default body width. mj-body in treeToMjml carries no explicit width.
+const EMAIL_BODY_WIDTH = 600;
+
+// MJML sizes a width-less mj-column as bodyWidth / columnCount, ignoring any
+// explicit width on its siblings. So mixing a fixed column (e.g. 400px) with an
+// auto column overflows the body (300px + 400px = 700 > 600) and the columns
+// wrap/stack in email clients. To avoid that we resolve every column to a
+// percentage that sums to 100%: explicit px/%, with the remainder split equally
+// among the auto columns.
+function columnWidthOverrides(children: EmailNode[]): string[] {
+  let explicitSum = 0;
+  let autoCount = 0;
+  const raw = children.map((child) => {
+    const w = child.type === "column" ? child.props.width : undefined;
+    if (w && w !== "auto") {
+      if (w.endsWith("%")) {
+        const p = parseFloat(w);
+        if (Number.isFinite(p)) {
+          explicitSum += p;
+          return p;
+        }
+      } else if (w.endsWith("px")) {
+        const p = (parseFloat(w) / EMAIL_BODY_WIDTH) * 100;
+        if (Number.isFinite(p)) {
+          explicitSum += p;
+          return p;
+        }
+      }
+    }
+    autoCount += 1;
+    return null;
+  });
+  const remaining = Math.max(0, 100 - explicitSum);
+  const per = autoCount > 0 ? remaining / autoCount : 0;
+  return raw.map((p) => `${parseFloat((p === null ? per : p).toFixed(4))}%`);
+}
+
+function nodeToMjml(node: EmailNode, widthOverride?: string): string {
   switch (node.type) {
     case "section": {
       const open =
@@ -30,16 +67,19 @@ function nodeToMjml(node: EmailNode): string {
         attr("background-color", node.props.backgroundColor) +
         attr("padding", node.props.padding) +
         `>`;
-      const inner = node.children.map(nodeToMjml).join("");
+      const widths = columnWidthOverrides(node.children);
+      const inner = node.children
+        .map((child, i) => nodeToMjml(child, widths[i]))
+        .join("");
       return `${open}${inner}</mj-section>`;
     }
     case "column": {
       const open =
         `<mj-column` +
-        attr("width", node.props.width) +
+        attr("width", widthOverride ?? node.props.width) +
         attr("vertical-align", node.props.verticalAlign) +
         `>`;
-      const inner = node.children.map(nodeToMjml).join("");
+      const inner = node.children.map((child) => nodeToMjml(child)).join("");
       return `${open}${inner}</mj-column>`;
     }
     case "hero": {
@@ -53,7 +93,7 @@ function nodeToMjml(node: EmailNode): string {
         attr("vertical-align", node.props.verticalAlign) +
         attr("padding", node.props.padding) +
         `>`;
-      const inner = node.children.map(nodeToMjml).join("");
+      const inner = node.children.map((child) => nodeToMjml(child)).join("");
       return `${open}${inner}</mj-hero>`;
     }
     case "text": {
@@ -171,6 +211,6 @@ function buildMjHead(tree: EmailNode[]): string {
 
 export function treeToMjml(tree: EmailNode[]): string {
   const head = buildMjHead(tree);
-  const body = tree.map(nodeToMjml).join("");
+  const body = tree.map((node) => nodeToMjml(node)).join("");
   return `<mjml>${head}<mj-body>${body}</mj-body></mjml>`;
 }

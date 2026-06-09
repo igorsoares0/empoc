@@ -29,7 +29,7 @@ export function Canvas() {
       <div className="flex flex-1 justify-center overflow-auto p-8">
         <div
           ref={setNodeRef}
-          className={`relative h-fit w-full max-w-2xl rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring-1 ring-zinc-200 transition-all ${
+          className={`relative h-fit w-[600px] max-w-full rounded-xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)] ring-1 ring-zinc-200 transition-all ${
             isOver && active ? "ring-2 ring-zinc-900" : ""
           }`}
           style={{ minHeight: "calc(100% - 1px)" }}
