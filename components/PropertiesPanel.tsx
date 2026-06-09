@@ -835,6 +835,103 @@ function NodeForm({ node }: { node: EmailNode }) {
     );
   }
 
+  if (node.type === "footer") {
+    return (
+      <div className="flex flex-col gap-3">
+        <Field label="Nome da marca">
+          <input
+            type="text"
+            value={node.props.companyName ?? ""}
+            onChange={(e) => update({ companyName: e.target.value })}
+            placeholder="Sua Marca"
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Endereço (exigido por lei anti-spam)">
+          <textarea
+            value={node.props.address ?? ""}
+            onChange={(e) => update({ address: e.target.value })}
+            placeholder="Rua, número — cidade, estado, CEP, país"
+            rows={2}
+            className={`${inputClass} resize-none`}
+          />
+        </Field>
+        <Field label="Texto do descadastro">
+          <input
+            type="text"
+            value={node.props.unsubscribeLabel ?? ""}
+            onChange={(e) => update({ unsubscribeLabel: e.target.value })}
+            placeholder="Cancelar inscrição"
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Link de descadastro">
+          <input
+            type="text"
+            value={node.props.unsubscribeUrl ?? ""}
+            onChange={(e) => update({ unsubscribeUrl: e.target.value })}
+            placeholder="{{unsubscribe}}"
+            className={inputClass}
+          />
+          <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
+            Use <code>{"{{unsubscribe}}"}</code> — o sistema de envio substitui
+            pelo link real de cada destinatário.
+          </p>
+        </Field>
+        <Field label="Fonte">
+          <FontSelect
+            value={node.props.fontFamily}
+            onChange={(v) => update({ fontFamily: v || undefined })}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Cor do texto">
+            <ColorInput
+              value={node.props.color}
+              onChange={(v) => update({ color: v })}
+            />
+          </Field>
+          <Field label="Cor do link">
+            <ColorInput
+              value={node.props.linkColor}
+              onChange={(v) => update({ linkColor: v })}
+            />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Tamanho">
+            <PxInput
+              value={node.props.fontSize}
+              onChange={(v) => update({ fontSize: v })}
+              min={8}
+              max={20}
+              step={1}
+              placeholder="12"
+            />
+          </Field>
+          <Field label="Alinhamento">
+            <select
+              value={node.props.align ?? "center"}
+              onChange={(e) => update({ align: e.target.value })}
+              className={inputClass}
+            >
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select>
+          </Field>
+        </div>
+        <Field label="Padding">
+          <PaddingInput
+            value={node.props.padding}
+            onChange={(v) => update({ padding: v })}
+            max={100}
+          />
+        </Field>
+      </div>
+    );
+  }
+
   return null;
 }
 

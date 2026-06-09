@@ -174,6 +174,33 @@ function nodeToMjml(node: EmailNode, widthOverride?: string): string {
         .join("");
       return `${open}${links}</mj-navbar>`;
     }
+    case "footer": {
+      const lines: string[] = [];
+      if (node.props.companyName) lines.push(escapeText(node.props.companyName));
+      if (node.props.address) lines.push(escapeText(node.props.address));
+      if (node.props.unsubscribeLabel) {
+        const href = node.props.unsubscribeUrl ?? "{{unsubscribe}}";
+        const linkColor =
+          node.props.linkColor ?? node.props.color ?? "#6b7280";
+        lines.push(
+          `<a href="${escapeAttr(href)}" style="color:${escapeAttr(
+            linkColor,
+          )};text-decoration:underline">${escapeText(
+            node.props.unsubscribeLabel,
+          )}</a>`,
+        );
+      }
+      const open =
+        `<mj-text` +
+        attr("color", node.props.color) +
+        attr("font-size", node.props.fontSize) +
+        attr("font-family", node.props.fontFamily) +
+        attr("align", node.props.align) +
+        attr("line-height", "1.6") +
+        attr("padding", node.props.padding) +
+        `>`;
+      return `${open}${lines.join("<br />")}</mj-text>`;
+    }
   }
 }
 

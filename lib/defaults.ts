@@ -141,6 +141,22 @@ export function createNode(type: NodeType): EmailNode {
           padding: "10px 0",
         },
       };
+    case "footer":
+      return {
+        id,
+        type: "footer",
+        props: {
+          companyName: "Sua Marca",
+          address: "Rua Exemplo, 123 — Cidade, Estado, CEP, País",
+          unsubscribeLabel: "Cancelar inscrição",
+          unsubscribeUrl: "{{unsubscribe}}",
+          color: "#9ca3af",
+          linkColor: "#6b7280",
+          fontSize: "12px",
+          align: "center",
+          padding: "16px 0",
+        },
+      };
   }
 }
 
@@ -154,6 +170,7 @@ export const BLOCK_LABELS: Record<NodeType, string> = {
   spacer: "Espaçador",
   divider: "Divisor",
   navbar: "Menu",
+  footer: "Rodapé",
 };
 
 export const BLOCK_ICONS: Record<NodeType, string> = {
@@ -166,4 +183,5 @@ export const BLOCK_ICONS: Record<NodeType, string> = {
   spacer: "↕",
   divider: "—",
   navbar: "≡",
+  footer: "ⓘ",
 };

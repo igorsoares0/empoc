@@ -9,7 +9,8 @@ export type NodeType =
   | "button"
   | "spacer"
   | "divider"
-  | "navbar";
+  | "navbar"
+  | "footer";
 
 export type SectionProps = {
   backgroundColor?: string;
@@ -85,6 +86,19 @@ export type NavbarProps = {
   padding?: string;
 };
 
+export type FooterProps = {
+  companyName?: string;
+  address?: string;
+  unsubscribeLabel?: string;
+  unsubscribeUrl?: string;
+  color?: string;
+  linkColor?: string;
+  fontFamily?: string;
+  fontSize?: string;
+  align?: "left" | "center" | "right";
+  padding?: string;
+};
+
 export type HeroProps = {
   mode?: "fluid-height" | "fixed-height";
   height?: string;
@@ -152,6 +166,12 @@ export type NavbarNode = {
   props: NavbarProps;
 };
 
+export type FooterNode = {
+  id: NodeId;
+  type: "footer";
+  props: FooterProps;
+};
+
 export type EmailNode =
   | SectionNode
   | ColumnNode
@@ -161,7 +181,8 @@ export type EmailNode =
   | ButtonNode
   | SpacerNode
   | DividerNode
-  | NavbarNode;
+  | NavbarNode
+  | FooterNode;
 
 export type ContainerNode = SectionNode | ColumnNode | HeroNode;
 export type LeafNode =
@@ -170,7 +191,8 @@ export type LeafNode =
   | ButtonNode
   | SpacerNode
   | DividerNode
-  | NavbarNode;
+  | NavbarNode
+  | FooterNode;
 
 export type Template = {
   id: string;

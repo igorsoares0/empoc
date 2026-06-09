@@ -579,6 +579,48 @@ export function CanvasNode({ node }: Props) {
     );
   }
 
+  if (node.type === "footer") {
+    return (
+      <div
+        ref={setDragRef}
+        {...attributes}
+        {...listeners}
+        onClick={handleClick}
+        style={{
+          textAlign: node.props.align ?? "center",
+          padding: node.props.padding ?? "16px 0",
+        }}
+        className={`my-1 cursor-pointer rounded px-2 ${baseRing} ${
+          isDragging ? "opacity-40" : ""
+        }`}
+      >
+        <div
+          style={{
+            color: node.props.color ?? "#9ca3af",
+            fontFamily: node.props.fontFamily,
+            fontSize: node.props.fontSize ?? "12px",
+            lineHeight: 1.6,
+          }}
+        >
+          {node.props.companyName ? <div>{node.props.companyName}</div> : null}
+          {node.props.address ? <div>{node.props.address}</div> : null}
+          {node.props.unsubscribeLabel ? (
+            <div>
+              <span
+                style={{
+                  color: node.props.linkColor ?? node.props.color ?? "#6b7280",
+                  textDecoration: "underline",
+                }}
+              >
+                {node.props.unsubscribeLabel}
+              </span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 

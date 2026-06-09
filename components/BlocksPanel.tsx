@@ -11,7 +11,7 @@ type BlockGroup = {
 
 const GROUPS: BlockGroup[] = [
   { title: "Estrutura", blocks: ["section", "column", "hero"] },
-  { title: "Conteúdo", blocks: ["text", "button", "navbar"] },
+  { title: "Conteúdo", blocks: ["text", "button", "navbar", "footer"] },
   { title: "Mídia & espaço", blocks: ["image", "spacer", "divider"] },
 ];
 

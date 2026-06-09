@@ -77,6 +77,8 @@ export function cloneNodeWithNewIds(n: EmailNode): EmailNode {
           links: n.props.links.map((l) => ({ ...l, id: nanoid(8) })),
         },
       };
+    case "footer":
+      return { id, type: "footer", props: { ...n.props } };
   }
 }
 
@@ -104,6 +106,8 @@ export function cloneTree(tree: EmailNode[]): EmailNode[] {
           ...n,
           props: { ...n.props, links: n.props.links.map((l) => ({ ...l })) },
         };
+      case "footer":
+        return { ...n, props: { ...n.props } };
     }
   });
 }
@@ -168,6 +172,7 @@ const COLUMN_LEAVES: NodeType[] = [
   "spacer",
   "divider",
   "navbar",
+  "footer",
 ];
 
 const HERO_LEAVES: NodeType[] = ["text", "image", "button", "spacer", "divider"];
