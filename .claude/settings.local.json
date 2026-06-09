@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "next-devtools"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(timeout 160 node __e2e-col.js)"
+    ]
+  }
+}

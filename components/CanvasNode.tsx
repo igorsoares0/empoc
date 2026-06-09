@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import type { EmailNode } from "@/types/email";
 import { useEditorStore } from "@/store/editorStore";
@@ -69,9 +69,11 @@ type Props = {
 function DropZone({
   parentId,
   index,
+  axis = "y",
 }: {
   parentId: string | null;
   index: number;
+  axis?: "x" | "y";
 }) {
   const { setNodeRef, isOver, active } = useDroppable({
     id: `drop:${parentId ?? "root"}:${index}`,
@@ -79,6 +81,26 @@ function DropZone({
   });
   const isDragging = !!active;
   const isActive = isDragging && isOver;
+
+  // eixo x: divisor vertical entre colunas numa seção (flex-row)
+  if (axis === "x") {
+    return (
+      <div className="relative w-0 self-stretch">
+        {/* hit area: só ativa durante drag */}
+        {isDragging ? (
+          <div ref={setNodeRef} className="absolute inset-y-0 -left-2 z-10 w-4" />
+        ) : (
+          <div ref={setNodeRef} className="absolute inset-y-0 left-0 w-0" />
+        )}
+        {/* indicador visual só quando hovering */}
+        {isActive ? (
+          <div className="pointer-events-none absolute inset-y-0 -left-px z-20 w-0.5 rounded bg-blue-500" />
+        ) : null}
+      </div>
+    );
+  }
+
+  // eixo y (padrão): divisor horizontal entre itens empilhados
   return (
     <div className="relative h-0">
       {/* hit area: só ativa durante drag */}
@@ -155,17 +177,22 @@ export function CanvasNode({ node }: Props) {
           Seção
         </div>
         <div className="flex flex-row gap-0">
-          <DropZone parentId={node.id} index={0} />
           {node.children.length === 0 ? (
             <div className="m-2 flex-1 rounded border-2 border-dashed border-zinc-300 px-4 py-8 text-center text-xs text-zinc-400">
               Solte uma coluna aqui
             </div>
           ) : (
-            node.children.map((child) => (
-              <div key={child.id} className="flex-1">
-                <CanvasNode node={child} />
-              </div>
-            ))
+            <>
+              <DropZone parentId={node.id} index={0} axis="x" />
+              {node.children.map((child, i) => (
+                <Fragment key={child.id}>
+                  <div className="flex-1">
+                    <CanvasNode node={child} />
+                  </div>
+                  <DropZone parentId={node.id} index={i + 1} axis="x" />
+                </Fragment>
+              ))}
+            </>
           )}
         </div>
       </div>

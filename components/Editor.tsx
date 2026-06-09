@@ -5,8 +5,11 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
+  type CollisionDetection,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -26,6 +29,16 @@ import { Preview } from "./Preview";
 import { Toolbar } from "./Toolbar";
 import { TemplatePicker } from "./TemplatePicker";
 import { EditorFonts } from "./EditorFonts";
+
+// Nested droppables (root canvas > section > column) overlap completely, so
+// the default rectIntersection can resolve a drop to the outer root canvas and
+// reject it (e.g. canBeRoot("column") === false). pointerWithin picks the
+// innermost droppable under the cursor; fall back to rectIntersection only when
+// the pointer is outside every droppable (e.g. dragging past the canvas edges).
+const collisionDetection: CollisionDetection = (args) => {
+  const pointerCollisions = pointerWithin(args);
+  return pointerCollisions.length > 0 ? pointerCollisions : rectIntersection(args);
+};
 
 export function Editor({ project }: { project: ProjectFull }) {
   const tree = useEditorStore((s) => s.tree);
@@ -144,6 +157,34 @@ export function Editor({ project }: { project: ProjectFull }) {
     }
 
     const childType = activeData.nodeType;
+
+    // Fallback: soltar uma coluna sobre uma coluna existente insere uma nova
+    // coluna ao lado dela, na mesma seção. Sem isso, a coluna preenche a seção
+    // (flex-1) e "engole" o drop — e como canContain(column, column) é false,
+    // o drop seria rejeitado, tornando layouts multi-coluna inalcançáveis.
+    if (
+      childType === "column" &&
+      overData.kind === "container" &&
+      overData.nodeType === "column" &&
+      overData.parentId
+    ) {
+      const found = findNode(tree, overData.parentId);
+      if (found?.parent && found.parent.type === "section") {
+        const sectionId = found.parent.id;
+        const insertIndex = found.index + 1;
+        if (activeData.source === "palette") {
+          addNode(sectionId, createNode("column"), insertIndex);
+        } else if (
+          activeData.source === "tree" &&
+          activeData.nodeId &&
+          activeData.nodeId !== found.node.id
+        ) {
+          moveNode(activeData.nodeId, sectionId, insertIndex);
+        }
+      }
+      return;
+    }
+
     const validRoot = parentType === "root" && canBeRoot(childType);
     const validContainer =
       (parentType === "section" ||
@@ -175,6 +216,7 @@ export function Editor({ project }: { project: ProjectFull }) {
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveDrag(null)}
